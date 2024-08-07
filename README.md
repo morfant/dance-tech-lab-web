@@ -1,6 +1,7 @@
 # dance-tech-web
 
-## Project setup
+## 프론트엔드
+### Project setup
 ```
 yarn install
 ```
@@ -22,3 +23,17 @@ yarn lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+
+## 백엔드(Python 3.11.7로 진행, 가상환경 설정 권장)
+
+### setup
+```
+cd backend
+pip install -r requirements.txt
+```
+
+### Run server
+```
+uvicorn main:app --reload
+```
