@@ -1,0 +1,101 @@
+/* 기존 스타일 추가 */
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f7f7f7;
+  margin: 0;
+}
+
+.chat-container {
+  width: 900px;
+  max-width: 100%;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+h1 {
+  background-color: #4caf50;
+  color: white;
+  padding: 20px;
+  margin: 0;
+  text-align: center;
+}
+
+.chat-box {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.message {
+  margin-bottom: 15px;
+  max-width: 80%;
+  padding: 10px 15px;
+  border-radius: 20px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.message.User {
+  align-self: flex-end;
+  background-color: #4caf50;
+  color: white;
+  border-top-right-radius: 0;
+}
+
+.message.Bot {
+  align-self: flex-start;
+  background-color: #e0e0e0;
+  color: #333;
+  border-top-left-radius: 0;
+}
+
+.input-container {
+  display: flex;
+  border-top: 1px solid #ddd;
+  padding: 10px;
+}
+
+.input-box {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  font-size: 16px;
+  outline: none;
+}
+
+.input-box:focus {
+  border-color: #4caf50;
+}
+
+.send-button {
+  margin-left: 10px;
+  padding: 10px 20px;
+  border: none;
+  background-color: #4caf50;
+  color: white;
+  font-size: 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.send-button:hover {
+  background-color: #45a049;
+}
+
+.send-button:disabled,
+.input-box:disabled {
+  background-color: #ddd;
+  cursor: not-allowed;
+}
