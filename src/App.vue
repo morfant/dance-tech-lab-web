@@ -7,10 +7,8 @@
           v-for="(message, index) in messages"
           :key="index"
           :class="['message', message.sender]"
-        >
-          <div class="message-content">
-            <strong>{{ message.sender }}:</strong> {{ message.text }}
-          </div>
+          v-html="renderMessage(message.text)"
+      > 
         </div>
       </div>
       <div class="input-container">
@@ -30,7 +28,11 @@
 </template>
 
 <script>
+
+import { marked } from 'marked';
+
 export default {
+
   data() {
     return {
       userInput: "",
@@ -51,13 +53,10 @@ export default {
 
       this.websocket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        console.log("data: ", data)
-        // const messageId = data.message_id;  // 메시지 ID를 추출
-        // console.log("messageId: ", messageId)
+        // console.log("data: ", data)
 
         if (data.response === "[END]") {
           this.isFetching = false;
-          // this.messageIdMap[messageId] = null;  // 응답 완료 후 ID 매핑 제거
         } else {
           if (this.messages.length > 0 && this.messages[this.messages.length - 1].sender === "Bot") {
             // 마지막 메시지가 Bot의 메시지인 경우 업데이트
@@ -91,6 +90,9 @@ export default {
       // 입력창 초기화
       this.userInput = "";
     },
+    renderMessage(text) {
+      return marked.parse(text);  // 마크다운을 HTML로 변환
+    }
   },
   mounted() {
     this.connectWebSocket(); // 컴포넌트가 마운트되면 웹소켓 연결

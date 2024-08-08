@@ -36,7 +36,9 @@ h1 {
   flex-direction: column;
 }
 
-.message {
+
+/* 대화 형식 */
+/* .message {
   margin-bottom: 15px;
   max-width: 80%;
   padding: 10px 15px;
@@ -57,6 +59,22 @@ h1 {
   background-color: #e0e0e0;
   color: #333;
   border-top-left-radius: 0;
+} */
+
+/* 마크다운 렌더링 형식 */
+.message {
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.message.Bot {
+  background-color: #f9f9f9;
+}
+
+.message.User {
+  background-color: #e0f7fa;
 }
 
 .input-container {
@@ -98,4 +116,11 @@ h1 {
 .input-box:disabled {
   background-color: #ddd;
   cursor: not-allowed;
+}
+
+.loading-indicator {
+  text-align: center;
+  padding: 10px;
+  color: #999;
+  font-style: italic;
 }
