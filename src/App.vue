@@ -12,14 +12,6 @@
             <strong>{{ message.sender }}:</strong> {{ message.text }}
           </div>
         </div>
-        <div v-if="isTyping" class="message Bot">
-          <div class="message-content">
-            <strong>Bot:</strong> {{ currentBotMessage }}
-          </div>
-        </div>
-        <div v-if="isFetching" class="loading-indicator">
-          Loading...
-        </div>
       </div>
       <div class="input-container">
         <input
@@ -30,7 +22,7 @@
           :disabled="isFetching"
         />
         <button @click="handleButtonClick" class="send-button">
-          {{ isTyping ? "Stop" : "Send" }}
+          {{ isFetching ? "Sending..." : "Send" }}
         </button>
       </div>
     </div>
@@ -43,92 +35,65 @@ export default {
     return {
       userInput: "",
       messages: [],
-      currentBotMessage: "",
-      isTyping: false,
       isFetching: false,
-      typingTimeout: null,
-      abortController: null,
-      partialMessage: "", // 부분적으로 출력된 메시지를 저장
+      websocket: null,
     };
   },
   methods: {
     handleButtonClick() {
-      if (this.isTyping) {
-        this.stopTyping();
-      } else {
+      if (!this.isFetching) {
         this.sendMessage();
       }
     },
-    sendMessage() {
-      if (this.userInput.trim() === "") return;
+    connectWebSocket() {
+      console.log("connectWebSocket()")
+      this.websocket = new WebSocket("ws://localhost:8000/ws/chat");
 
-      this.messages.push({ sender: "User", text: this.userInput });
-      this.isFetching = true;
+      this.websocket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log("data: ", data)
+        // const messageId = data.message_id;  // 메시지 ID를 추출
+        // console.log("messageId: ", messageId)
 
-      this.abortController = new AbortController(); // AbortController 생성
-      const signal = this.abortController.signal;
-
-      fetch("http://localhost:8000/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message: this.userInput }),
-        signal, // 요청에 신호 추가
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          this.displayBotMessage(data.response);
-        })
-        .catch((error) => {
-          if (error.name === "AbortError") {
-            console.log("Fetch aborted");
-            if (this.partialMessage) {
-              this.messages.push({ sender: "Bot", text: this.partialMessage });
-            }
-          } else {
-            console.error("Error:", error);
-          }
-        })
-        .finally(() => {
+        if (data.response === "[END]") {
           this.isFetching = false;
-        });
-
-      this.userInput = "";
-    },
-    displayBotMessage(message) {
-      this.currentBotMessage = "";
-      this.isTyping = true;
-      this.partialMessage = ""; // 부분 메시지 초기화
-      let index = 0;
-
-      const type = () => {
-        if (index < message.length) {
-          this.currentBotMessage += message[index];
-          this.partialMessage += message[index]; // 현재까지의 부분 메시지를 저장
-          index++;
-          this.typingTimeout = setTimeout(type, 50);
+          // this.messageIdMap[messageId] = null;  // 응답 완료 후 ID 매핑 제거
         } else {
-          this.messages.push({ sender: "Bot", text: this.currentBotMessage });
-          this.isTyping = false;
+          if (this.messages.length > 0 && this.messages[this.messages.length - 1].sender === "Bot") {
+            // 마지막 메시지가 Bot의 메시지인 경우 업데이트
+            const lastMessage = this.messages[this.messages.length - 1];
+            lastMessage.text = data.response;
+          } else {
+            // 새 Bot 메시지 추가
+            this.messages.push({ sender: "Bot", text: data.response });
+          }
         }
       };
 
-      type();
-    },
-    stopTyping() {
-      clearTimeout(this.typingTimeout); // 타이머 정지
-      this.isTyping = false;
-      this.currentBotMessage = ""; // 현재 메시지 초기화
+      this.websocket.onclose = () => {
+        console.log("WebSocket connection closed");
+        this.isFetching = false;
+      };
 
-      if (this.abortController) {
-        this.abortController.abort(); // 요청 취소
-      }
-      // 부분적으로 출력된 메시지를 메시지 목록에 추가
-      if (this.partialMessage) {
-        this.messages.push({ sender: "Bot", text: this.partialMessage });
-      }
+      this.websocket.onerror = (error) => {
+        console.error("WebSocket error:", error);
+        this.isFetching = false;
+      };
     },
+    sendMessage() {
+      console.log("sendMessage()")
+      if (this.userInput.trim() === "") return;
+      // User의 메시지 추가
+      this.messages.push({ sender: "User", text: this.userInput });
+      this.isFetching = true;
+      // 웹소켓을 통해 메시지 전송
+      this.websocket.send(JSON.stringify({ message: this.userInput }));
+      // 입력창 초기화
+      this.userInput = "";
+    },
+  },
+  mounted() {
+    this.connectWebSocket(); // 컴포넌트가 마운트되면 웹소켓 연결
   },
 };
 </script>

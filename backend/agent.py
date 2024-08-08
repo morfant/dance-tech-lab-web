@@ -1,52 +1,29 @@
-import getpass
+# agent.py
+
 import os
-from typing import Annotated
-from typing_extensions import TypedDict
+from typing import TypedDict
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 from langchain_openai import ChatOpenAI
 
-
-def _set_env(var: str):
-    if not os.environ.get(var):
-        os.environ[var] = getpass.getpass(f"{var}: ")
-
-
-_set_env("OPENAI_API_KEY")
-_set_env("LANGSMITH_API_KEY")
-# os.environ["LANGCHAIN_TRACING_V2"] = "true"
-os.environ["LANGCHAIN_PROJECT"] = "LangGraph Tutorial"
-
+# 환경 변수 설정 (필요에 따라 main.py에서 설정하는 방식과 동일하게 할 수 있음)
+# os.environ["OPENAI_API_KEY"] = "your_openai_api_key"
+# os.environ["LANGSMITH_API_KEY"] = "your_langsmith_api_key"
+# os.environ["LANGCHAIN_PROJECT"] = "LangGraph Tutorial"
 
 class State(TypedDict):
-    # Messages have the type "list". The `add_messages` function
-    # in the annotation defines how this state key should be updated
-    # (in this case, it appends messages to the list, rather than overwriting them)
-    messages: Annotated[list, add_messages]
-
+    messages: list
 
 graph_builder = StateGraph(State)
 llm = ChatOpenAI(model="gpt-4o")
 
-
 def chatbot(state: State):
     return {"messages": [llm.invoke(state["messages"])]}
 
-
-# The first argument is the unique node name
-# The second argument is the function or object that will be called whenever
-# the node is used.
 graph_builder.add_node("chatbot", chatbot)
 graph_builder.add_edge(START, "chatbot")
 graph_builder.add_edge("chatbot", END)
-graph = graph_builder.compile()
 
-
-while True:
-    user_input = input("User: ")
-    if user_input.lower() in ["quit", "exit", "q"]:
-        print("Goodbye!")
-        break
-    for event in graph.stream({"messages": ("user", user_input)}):
-        for value in event.values():
-            print("Assistant:", value["messages"][-1].content)
+# 컴파일된 그래프 반환
+def get_graph():
+    return graph_builder.compile()
