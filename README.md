@@ -6,9 +6,9 @@
 yarn install
 ```
 
-### Compiles and hot-reloads for development
+### Compiles and hot-reloads for development(Test를 위해서는 여기까지만 하면 됩니다)
 ```
-yarn serve
+yarn serve 
 ```
 
 ### Compiles and minifies for production
