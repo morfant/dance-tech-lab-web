@@ -5,15 +5,15 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #f7f7f7;
+  background-color: #ffffff;
   margin: 0;
 }
 
 .chat-container {
-  width: 900px;
+  width: 800px;
   max-width: 100%;
   background: #fff;
-  border-radius: 8px;
+  border-radius: 20px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   display: flex;
@@ -21,7 +21,7 @@
 }
 
 h1 {
-  background-color: #819ec0;
+  background-color: #9cbbc0;
   color: white;
   padding: 20px;
   margin: 0;
@@ -74,7 +74,7 @@ h1 {
 }
 
 .message.User {
-  background-color: #e0f7fa;
+  background-color: #d0e4e7;
 }
 
 .input-container {
@@ -100,7 +100,7 @@ h1 {
   margin-left: 10px;
   padding: 10px 20px;
   border: none;
-  background-color: #819ec0;
+  background-color: #9cbbc0;
   color: white;
   font-size: 16px;
   border-radius: 20px;
@@ -109,7 +109,7 @@ h1 {
 }
 
 .send-button:hover {
-  background-color: #45a049;
+  background-color: #c383bc;
 }
 
 .send-button:disabled,

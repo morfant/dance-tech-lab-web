@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <div class="chat-container">
-      <h1>Chatbot</h1>
+      <h1>Dance Tech Lab</h1>
       <div class="chat-box">
         <div
           v-for="(message, index) in messages"
