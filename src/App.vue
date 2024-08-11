@@ -39,6 +39,7 @@ export default {
       messages: [],
       isFetching: false,
       websocket: null,
+
     };
   },
   methods: {
@@ -58,13 +59,14 @@ export default {
         if (data.response === "[END]") {
           this.isFetching = false;
         } else {
-          if (this.messages.length > 0 && this.messages[this.messages.length - 1].sender === "Bot") {
+          const { agentType, response } = data;
+          if (this.messages.length > 0 && this.messages[this.messages.length - 1].sender === "Bot" && this.messages[this.messages.length - 1].agentType === agentType) {
             // 마지막 메시지가 Bot의 메시지인 경우 업데이트
             const lastMessage = this.messages[this.messages.length - 1];
-            lastMessage.text = data.response;
+            lastMessage.text = response;
           } else {
             // 새 Bot 메시지 추가
-            this.messages.push({ sender: "Bot", text: data.response });
+            this.messages.push({ sender: "Bot", text: response, agentType });
           }
         }
       };
@@ -83,7 +85,7 @@ export default {
       console.log("sendMessage()")
       if (this.userInput.trim() === "") return;
       // User의 메시지 추가
-      this.messages.push({ sender: "User", text: this.userInput });
+      this.messages.push({ sender: "User", text: this.userInput, agentType: "User" });
       this.isFetching = true;
       // 웹소켓을 통해 메시지 전송
       this.websocket.send(JSON.stringify({ message: this.userInput }));

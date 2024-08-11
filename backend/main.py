@@ -1,8 +1,10 @@
 # main.py
 
+import pprint
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 import asyncio
-from agent import get_graph  # 에이전트 가져오기
+# from agent import get_graph  # 에이전트 가져오기
+from agents import get_graph  # 에이전트 가져오기
 
 app = FastAPI()
 
@@ -17,29 +19,46 @@ async def websocket_chat(websocket: WebSocket):
         while True:
             data = await websocket.receive_json()
             user_input = data.get("message", "")
+            # print("user_input: ", user_input)
 
-            state = {"messages": [("user", user_input)]}
             response_message = ""
             partial_message = ""
 
-            # 동기 제너레이터를 반복하면서 비동기적으로 처리
-            for event in graph.stream(state):
-                for value in event.values():
-                    response_message = value["messages"][-1].content
+            inputs = {"question": user_input}
+            for output in graph.stream(inputs):
+                for key, value in output.items():
+                    print('\n')
+                    pprint.pprint(f">> Node: [{key}]")
+                    pprint.pprint("------------------------------------")
+                    pprint.pprint({"STATE": value}, indent=2, width=80, depth=None)
 
-                # 실시간으로 클라이언트에게 부분적으로 응답을 전송
-                for char in response_message[len(partial_message):]:
-                    partial_message += char
-                    await websocket.send_json({"response": partial_message})
-                    await asyncio.sleep(0.05)  # 타이핑 딜레이
+                    # value에 포함될 수 있는, web 에 출력 되어야 하는 key 들
+                    _plan = value.get('plan')
+                    _generation = value.get('generation')
+                    _research = value.get('research')
 
-            await websocket.send_json({"response": "[END]"})
+                    response_message = _plan or _generation or _research
+
+                    # 타이핑 효과를 위해, 실시간으로 클라이언트에게 부분적으로 응답을 전송
+                    if response_message != None:
+                        for char in response_message[len(partial_message):]:
+                            partial_message += char
+                            await websocket.send_json({"response": partial_message, "agentType": key})
+                            await asyncio.sleep(0.02)  # 타이핑 딜레이
+                    partial_message = ""
+
+                    await websocket.send_json({"response": "[END]", "agentType": key})
+
+            pprint.pprint("------------------------------------")
+            # Final generation
+            pprint.pprint(value["generation"])
+
 
     except WebSocketDisconnect:
         print("WebSocket connection closed")
 
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"WebSocket Error: {e}")
         await websocket.close()
 
 # FastAPI 실행
