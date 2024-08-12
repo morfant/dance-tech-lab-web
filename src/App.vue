@@ -16,6 +16,7 @@
             :class="['message', message.sender]"
             v-html="renderMessage(message.text)"
           ></div>
+          <div v-if="isFetching" class="loading-indicator">Fetching response...</div>
         </div>
         <div class="input-container">
           <input
@@ -74,6 +75,7 @@ export default {
           } else {
             this.messages.push({ sender: "Bot", text: response, agentType });
           }
+          this.isFetching = false; // 데이터 수신 후 로딩 상태 해제
         }
       };
 
@@ -95,7 +97,7 @@ export default {
         text: this.userInput,
         agentType: "User",
       });
-      this.isFetching = true;
+      this.isFetching = true; // 메시지 전송 시 로딩 상태 설정
       this.websocket.send(JSON.stringify({ message: this.userInput }));
       this.userInput = "";
     },
@@ -164,7 +166,7 @@ export default {
   display: flex;
   flex-direction: column;
   background: #fff;
-  width: 255%; /* 여기서 기본 width를 설정합니다 */
+  width: 900px; /* 여기서 기본 width를 설정합니다 */
 
 }
 
