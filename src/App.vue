@@ -25,7 +25,7 @@
             :class="['message', message.sender]"
             v-html="renderMessage(message.text)"
           ></div>
-          <div v-if="isFetching" class="loading-indicator">Fetching response...</div>
+          <div v-if="isFetching" class="loading-indicator">응답을 받아오는 중입니다...</div>
         </div>
         <div class="input-container">
           <input
@@ -71,8 +71,11 @@ export default {
       this.websocket.onmessage = (event) => {
         const data = JSON.parse(event.data);
 
-        if (data.response === "[END]") {
-          this.isFetching = false;
+
+        if (data.response === "[END]"){
+          if (data.agentType === "generate") {
+            this.isFetching = false;
+          }
         } else {
           const { agentType, response } = data;
           if (
@@ -85,7 +88,7 @@ export default {
           } else {
             this.messages.push({ sender: "Bot", text: response, agentType });
           }
-          this.isFetching = false; // 데이터 수신 후 로딩 상태 해제
+          // this.isFetching = false; // 데이터 수신 후 로딩 상태 해제
         }
       };
 
@@ -177,7 +180,7 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background-color: #f5f5f5; /* 사이드바와 같은 배경색 */
+  background-color: #ffffff; /* 사이드바와 같은 배경색 */
 
 }
 
