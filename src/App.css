@@ -9,6 +9,38 @@
   margin: 0;
 }
 
+
+.main-container {
+  display: flex;
+}
+
+.sidebar {
+  width: 200px;
+  background-color: #f0f0f0;
+  padding: 20px;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+}
+
+.sidebar h2 {
+  margin-bottom: 20px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar ul li {
+  margin: 10px 0;
+  cursor: pointer;
+  color: #333;
+}
+
+.sidebar ul li:hover {
+  color: #007bff;
+}
+
+
 .chat-container {
   width: 800px;
   max-width: 100%;
@@ -124,3 +156,6 @@ h1 {
   color: #999;
   font-style: italic;
 }
+
+
+
