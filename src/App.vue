@@ -1,14 +1,23 @@
 <template>
   <div id="app">
     <div class="sidebar">
-      <h2>Menu</h2>
+      <h2>AI Collaborator</h2>
       <ul>
-        <li v-for="menu in menus" :key="menu">{{ menu }}</li>
+        <li 
+          v-for="menu in menus" 
+          :key="menu" 
+          @click="setActiveMenu(menu)"
+          :class="{ active: menu === activeMenu }"
+        >
+          {{ menu }}
+        </li>
       </ul>
+
+
     </div>
     <div class="main-container">
       <div class="chat-container">
-        <h1>Dance Tech Lab</h1>
+        <h1>{{ activeMenu }}</h1>
         <div class="chat-box">
           <div
             v-for="(message, index) in messages"
@@ -45,7 +54,8 @@ export default {
       messages: [],
       isFetching: false,
       websocket: null,
-      menus: ["Home", "About", "Services", "Contact"], // 메뉴 항목 추가
+      menus: ["Research", "Rehearsal", "Production", "Feedback"], // 메뉴 항목 추가
+      activeMenu: "Research", // 기본 메뉴 설정
     };
   },
   methods: {
@@ -101,6 +111,9 @@ export default {
       this.websocket.send(JSON.stringify({ message: this.userInput }));
       this.userInput = "";
     },
+    setActiveMenu(menu) {
+      this.activeMenu = menu; // 선택된 메뉴 항목 설정
+    },
     renderMessage(text) {
       return marked.parse(text);
     },
@@ -112,18 +125,23 @@ export default {
 </script>
 
 <style>
+
+body {
+  margin-top: 0px;
+}
 /* 기본 스타일 설정 */
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   display: flex;
   height: 100vh;
-  margin: 0;
-  background-color: #f5f5f5; /* 전체 배경색을 통일감 있게 설정 */
+  margin: 0 auto;
+  background-color: #ffffff; /* 전체 배경색을 통일감 있게 설정 */
+  width: 100%;
 }
 
 .sidebar {
   width: 200px;
-  background-color: #333;
+  background-color: #599898;
   padding: 20px;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
   position: fixed;
@@ -145,11 +163,12 @@ export default {
 .sidebar ul li {
   margin: 10px 0;
   cursor: pointer;
-  color: #ddd;
+  color: #ffffff;
+  font-size: larger;
 }
 
 .sidebar ul li:hover {
-  color: #007bff;
+  color: #01050f;
 }
 
 .main-container {
@@ -159,6 +178,7 @@ export default {
   flex-direction: column;
   height: 100vh;
   background-color: #f5f5f5; /* 사이드바와 같은 배경색 */
+
 }
 
 .chat-container {
@@ -166,12 +186,14 @@ export default {
   display: flex;
   flex-direction: column;
   background: #fff;
-  width: 900px; /* 여기서 기본 width를 설정합니다 */
 
+  width: 100%;
+  max-width: 1200px; /* 여기서 기본 width를 설정합니다 */
+  margin: 0 auto;
 }
 
 h1 {
-  background-color: #007bff; /* 상단 헤더 색상 */
+  background-color: #4b8b9f; /* 상단 헤더 색상 */
   color: white;
   padding: 15px;
   margin: 0;
@@ -199,13 +221,13 @@ h1 {
 }
 
 .message.User {
-  background-color: #007bff; /* 사용자 메시지 색상 */
+  background-color: #75abe4; /* 사용자 메시지 색상 */
   color: #fff;
 }
 
 .input-container {
   display: flex;
-  padding: 10px;
+  padding: 10px 10px 10px 20px;
   background-color: #fff; /* 입력창 배경색 */
   border-top: 1px solid #ddd;
 }
@@ -227,7 +249,7 @@ h1 {
   margin-left: 10px;
   padding: 10px 20px;
   border: none;
-  background-color: #007bff; /* 버튼 색상 통일 */
+  background-color: #599898; /* 버튼 색상 통일 */
   color: white;
   font-size: 16px;
   border-radius: 20px;
@@ -236,7 +258,7 @@ h1 {
 }
 
 .send-button:hover {
-  background-color: #0056b3;
+  background-color: #31add2;
 }
 
 .send-button:disabled,
@@ -250,5 +272,10 @@ h1 {
   padding: 10px;
   color: #999;
   font-style: italic;
+}
+
+.sidebar ul li.active {
+  background-color: #007bff; /* 활성화된 메뉴의 배경색 */
+  color: #ffffff; /* 활성화된 메뉴의 글자색 */
 }
 </style>
