@@ -27,7 +27,7 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 ## 백엔드(Python 3.11.7로 진행, 가상환경 설정 권장)
 
-### setup
+### setup!
 ```
 cd backend
 pip install -r requirements.txt
