@@ -4,7 +4,7 @@ import pprint
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 import asyncio
 # from agent import get_graph  # 에이전트 가져오기
-from agents import get_graph  # 에이전트 가져오기
+from agents_ import get_graph  # 에이전트 가져오기
 
 app = FastAPI()
 
