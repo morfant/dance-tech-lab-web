@@ -66,7 +66,8 @@ export default {
     },
     connectWebSocket() {
       console.log("connectWebSocket()");
-      this.websocket = new WebSocket("ws://unbarrier.net:4001/ws/chat");
+      // this.websocket = new WebSocket("ws://unbarrier.net:4001/ws/chat"); // Deploy
+      this.websocket = new WebSocket("ws://127.0.0.1:4001/ws/chat"); // Local test
 
       this.websocket.onmessage = (event) => {
         const data = JSON.parse(event.data);
