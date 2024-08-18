@@ -69,12 +69,30 @@ from langchain_core.runnables.config import RunnableConfig
 
 urls = [
     "http://choomin.sfac.or.kr/zoom/zoom_view.asp?zom_idx=840&div=01&type=VW",
-    "https://lilianweng.github.io/posts/2023-06-23-agent/",
-    "https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/",
-    "https://lilianweng.github.io/posts/2023-10-25-adv-attack-llm/",
+    "http://choomin.sfac.or.kr/zoom/zoom_view.asp?type=VW&div=&zom_idx=822&page=2&field=&keyword=",
+    "http://choomin.sfac.or.kr/zoom/zoom_view.asp?type=VW&div=&zom_idx=817&page=2&field=&keyword=",
+    "http://choomin.sfac.or.kr/zoom/zoom_view.asp?type=VW&div=&zom_idx=761&page=4&field=&keyword=",
+    "http://choomin.sfac.or.kr/zoom/zoom_view.asp?type=IN&div=&zom_idx=839&page=1&field=&keyword=",
+
     "https://1000scores.com/portfolio-items/kevin-rittberger-codecode/",
-    # "https://www.corpusweb.net/a-practice-as-an-other.html",
-    #"https://www.corpusweb.net/",    
+    
+    "https://www.corpusweb.net/a-practice-as-an-other.html",
+    "https://www.corpusweb.net/performative-arts-and-the-turn-of-an-era.html",
+    "https://www.corpusweb.net/meeting-yvonne-rainer.html",
+    "https://www.corpusweb.net/after-dance.html",
+    "https://www.corpusweb.net/-dance-like-hell.html",
+    "https://www.corpusweb.net/answers-0107.html",
+    "https://www.corpusweb.net/answers-0814.html",
+    "https://www.corpusweb.net/answers-1521.html",
+    "https://www.corpusweb.net/answers-2228.html",
+    "https://www.corpusweb.net/answers-2935.html",
+    "https://www.corpusweb.net/answers-3642.html",
+    "https://www.corpusweb.net/answers-4349.html",
+    "https://www.corpusweb.net/answer-50-en.html",
+   
+    "https://www.orartswatch.org/ai-wants-your-art-do-you-have-a-say/",
+    "https://stedelijkstudies.com/journal/the-troubles-with-temporality/",
+    "https://khio.no/en/staff/bojana-cvejic",   
 ]
 
 docs = [WebBaseLoader(url).load() for url in urls]
@@ -88,7 +106,7 @@ text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
 doc_splits = text_splitter.split_documents(docs_list)
 
 # print('\n' + ">> splits size: {}".format(len(doc_splits)))
-print(doc_splits[8])
+# print(doc_splits[8])
 
 # Add to vectorDB
 vectorstore = Chroma.from_documents(
@@ -97,9 +115,6 @@ vectorstore = Chroma.from_documents(
     embedding=OpenAIEmbeddings(),
 )
 retriever = vectorstore.as_retriever()
-
-#
-
 
 
 class GradeDocuments(BaseModel):
@@ -122,21 +137,21 @@ class Review(BaseModel):
     plan: List[str] = Field(description="The step by step plan you make to accomplish user's reuquest")
     research_area: List[str] = Field(description="the list of the area that requires further research")
 
-
 class initialPlan(BaseModel):
     explanation: str = Field(description="logical explanation how you set up the plan")
     plan: List[str] = Field(description="The step by step plan to accomplish user's reuquest")
     research_area: List[str] = Field(description="The research_area is the list of the area that requires further research")
 
-
 class Research(BaseModel):
-    research_direction: str = Field(description="guidance and instruction for conducting research on topics")
+    # research_direction: List[str] = Field(description="groups of research instructions for each research topic to conduct in-depth research on topics")
+    research_direction: str = Field(description="groups of research instructions for each research topic to conduct in-depth research on topics")
     research_area: List[str] = Field(description="The research_area is the list of the area that requires further research")
 
 # class AgentState(TypedDict):
 #     # The add_messages function defines how an update should be processed
 #     # Default is to replace. add_messages says "append"
 #     messages: Annotated[Sequence[BaseMessage], add_messages]
+
 
 class GraphState(TypedDict):
     """
@@ -163,59 +178,16 @@ class GraphState(TypedDict):
     retrieve_count: int   
 
 
-
-query = "Methods for thematic mapping and brainstorming in creative processes."
-query = "피나 바우쉬의 작품세계에 대해 설명해주세요."
-
 #TAVILY API
 tavily_search_tool = TavilyClient(api_key="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")
 
 # content = client.search("What happened in the latest burning man floods?", search_depth="advanced")["results"]
 # response = tavily_search_tool.search(query, search_depth="advanced", include_raw_content=True, max_results=5)["results"]
 
-# for i in response:
-#     print(i)
-
-# print('\n'+ '-----------------------'+ '\n')
-
-# results = []
-# for i in response:
-#     result = i['raw_content']
-#     results.append(result)
-#     # print('\n' + "RAW: {}".format(results))  
-
-# combined_results_01 = " ".join(results)
-# wrapped_result_01 = textwrap.fill(combined_results_01, width=120)
-# print(">> 리서치 결과(RAW): {}".format(wrapped_result_01))
-
-# results = []
-# for i in response:
-#     result = i['content']
-#     results.append(result)
-#     # print('\n' + "NORMAL: {}".format(results))  
-
-# combined_results_02 = " ".join(results)
-# wrapped_result_02 = textwrap.fill(combined_results_02, width=120)
-# print('\n' + ">> 리서치 결과(NORMAL): {}".format(wrapped_result_02))
-
-# # print(">> COMBINED: {}".format(combined_results))
-# # print('\n' + ">> CONTENT: {}".format(response['results'][0]['content']))
-# # print('\n' + ">> RAW: {}".format(response['results'][0]['raw_content']))
-
 
 # #TAVILY - langchain
 # web_search_tool = TavilySearchResults(k=5)
 # results_02 = web_search_tool.invoke({"query": query})
-
-# results =[]
-# for i in results_02:
-#     result = i['content']
-#     results.append(result)
-
-# combined_results_03 = " ".join(results)
-# wrapped_result_03 = textwrap.fill(combined_results_03 , width=120)
-
-# print('\n' + ">> 리서치 결과(LANG TAVILY): {}".format(wrapped_result_03))
 
 
 #WEB SCRAPING
@@ -231,10 +203,7 @@ def scrape_webpages(urls: List[str]) -> str:
     )
 
 
-
 ###LLM
-
-
 #for agent
 llm_agent = ChatOpenAI(temperature=0, streaming=True, model="gpt-4o")
 structured_llm_agent = llm_agent.with_structured_output(initialPlan)
@@ -258,7 +227,7 @@ system = """You are a professional assistant helping the user to find informatio
                 - Provide these in a numbered list under the key 'research_areas' and explain why each area is important.
 
             4. Explanation:
-                - Offer a detailed explanation of the reasoning behind the plan and the selected research areas.
+                - Offer a detailed explanation of logical basis and the reasoning behind the plan and the selected research areas.
                 - Include the logical basis, assumptions made, and any potential challenges in at least 300 words.
                 - Present this explanation under the key 'explanation'.
             
@@ -270,18 +239,8 @@ system = """You are a professional assistant helping the user to find informatio
 
            """
 
-            # You first understand the context of the request made by the uesr and devise a step-by-step plan with great detial to accomplish what the user request, and suggest that to users. \n 
-            # You make a numbered list of what needs to be done to accomplish what the user request, and present your plan to the user with the key 'plan'.\n 
-            # Identify areas that require extensive research to accomplish your plan, and present them in a numbered list with the key 'research_area.\n
-            # You explain the logical basis on which you set up the plan and research area with the key 'explanation'. \n 
-
-# system = """You are a professional assistant help user to find information. \n 
-#             When the user ask or request something, you start response by saying "[매니저입니다.] \n
-#             Summarize the user's request, and ask them to confirm that you understood correctly. \n 
-#             You make a step by step plan to achieve what users want, and suggest that to users. \n 
-#             If necessary, seek clarifying details.\n
-#             You make a numbered list of what needs to be done to accomplish what the user wants, and present your plan to the user. \n
-#             Indentify areas that require extensive research to accomplish your plan, and present them in a numbered list.\n 
+#            You first understand the context of the request made by the uesr and devise a step-by-step plan with great detial to accomplish what the user request, and suggest that to users. \n 
+#            
 #             Return the response as a JSON object with the following structure: 
 #             {
 #             "plan": [List of steps to achieve the user's goal],
@@ -307,7 +266,7 @@ system ="""you are a professional critic with a lot of experiences who critique 
              You are verbose and logical.\n 
              when the user ask or request something, you start response by saying "[비평 agent입니다.]\n 
 
-            1. Critique Introduction**:
+            1. Critique Introduction:
                 - Provide a concise summary of the content you are critiquing, focusing on the key points and context.
 
             2. Critique Details:
@@ -323,7 +282,7 @@ system ="""you are a professional critic with a lot of experiences who critique 
                 - Keep the plan concise, aiming for 300-500 words to maintain focus and clarity, while providing enough detail for implementation.
 
             4. Research Areas:
-                - Based on your critique, analyze the given research area and Identify and update at least 8 distinct areas that require further research to successfully implement the revised plan.
+                - Based on your critique, analyze the given research area and Identify and update at least 10 distinct areas that require further research to successfully implement the revised plan.
                 - Ensure that each area is specific, actionable, and directly tied to the improvements suggested in the critique.
                 - Provide a brief explanation for each area, highlighting why it is crucial for the success of the plan.
                 - Avoid the use of demonstrative pronouns; instead, use explicit proper nouns for clarity and precision.
@@ -400,9 +359,7 @@ structured_llm_research_director = llm_research_director.with_structured_output(
 #             After finishing all the research on items on the list, you summarize your findings in at least 700 words, offering insights into various aspects of the topic.\n
 #             The summarization you provide should be formatted in markdown, with appropriate use of headings and bullet points for easy navigation and readability.\n """
 
-
-
-system_00 = """You are an experienced research director specialized in improving and optimizing research areas for academic inquiry and effective web search, as well as in designing clear and logical research directions that guide researchers efficiently to efficiently gather relevant information, analyze data, and achieve meaningful results.".\n
+system_00 = """You are an experienced research director specialized in improving and optimizing research areas for academic inquiry and effective web search, as well as in designing clear and logical research directions that guide researchers efficiently to efficiently gather relevant information, analyze data, and achieve meaningful results.
             
             when the user ask something you start by saying "[리서치 디렉터 agent입니다.]",and summarize the request you've received.\n
             
@@ -419,40 +376,102 @@ system_00 = """You are an experienced research director specialized in improving
                 - As a Research Director, your task is to create clear and comprehensive research instructions for a Research Agent related to the topics. When generating these instructions, ensure that the research process is structured and covers all necessary aspects. 
                 Use the following framework to develop your instructions:
 
-                    - 1)Overview and Context:
+                     - Heading: 
+                        Clearly state the research topic at the beginning of the prompt. Ensure the topic is prominently displayed.   
+
+                    - 1.Overview and Context:
                         Instruct the Research Agent to start with a brief summary of the topic, explaining its significance and relevance. Ensure they provide any necessary background information that sets the context for the research.
                     
-                    - 2)Critical Questions and Key Points:
+                    - 2.Critical Questions and Key Points:
                         Guide the Research Agent to identify and address at least five critical questions central to the topic. These questions should drive the research and highlight the key themes or issues that need to be explored.
-                    
-                    - 3)Potential Information Sources:
-                        Direct the Research Agent to identify and recommend specific sources that will be useful for the research. Ensure that they include a variety of credible resources (e.g., books, articles, databases) and explain why each source is valuable.
-                    
-                    - 4)Key Quotes, Passages, and Data:
+
+                    - 3.Key Quotes, Passages, and Data:
                         Ask the Research Agent to extract and present at least five important quotes, passages, or data points relevant to the topic. They should clearly explain the significance of each piece of evidence.
+
+                    - 4.Additional Considerations:
+                        Remind the Research Agent to highlight any additional factors that should be considered, such as ethical concerns, historical context, social cliamte, contemporary trends, cultural significance, the medium's characteristics, and impact on enviroment.
+                        This section should ensure a well-rounded approach to the topic by addressing these crucial elements that influence the subject matter.
+
+                    - 5.References:
+                        Instruct the Research Agent to compile a list of references or citations that should be included in the research. Ensure they follow proper citation formats and provide a comprehensive list of sources.  
+
+                    - 6.Further Questions:
+                        Encourage the Research Agent to list any additional questions that arise naturally from the topic. These questions should help refine the research focus or guide future exploration.    
                     
-                    - 5)References:
-                        Instruct the Research Agent to compile a list of references or citations that should be included in the research. Ensure they follow proper citation formats and provide a comprehensive list of sources.
-                    
-                    - 6)Additional Considerations:
-                        Remind the Research Agent to highlight any additional factors that should be considered, such as ethical concerns, historical context, or current trends. This section should ensure a well-rounded approach to the topic.
-                    
-                    - 7)Further Questions:
-                        Encourage the Research Agent to list any additional questions that arise naturally from the topic. These questions should help refine the research focus or guide future exploration.
+                    - 7.Potential Information Sources:
+                        Direct the Research Agent to identify and recommend specific sources that will be useful for the research. Ensure that they include a variety of credible resources (e.g., books, articles, databases) and explain why each source is valuable.
                     
                     Use this structure to create a clear and organized set of instructions for the Research Agent. Ensure that each section is detailed enough to guide them through the research process effectively.
 
                 - For instructions for **each** research topic:
-                    - Present guidance and instruction on each research topic in a well-structured report of at least 1000 words, ensuring that the instruction follows a directive format to guide the research process under the key 'research_direction.'
+                    - Present guidance and instruction on each research topic in a well-structured report of at least 1000 words, ensuring that the instruction follows a directive format to guide the research process.
                     - Use markdown formatting for clarity, including appropriate headings, bullet points, and other elements to enhance readability.
-                        - Number all sections and subsections to provide a clear and organized structure.  \n
+                        - Number all sections and subsections to provide a clear and organized structure.  
 
                 - After completing the instruction on each topic, **automatically proceed** to the next topic in the list.\n
-                - Final output should be in English.  
+                - Present these instructions in a numbered format under the key 'research_direction'.
+                - Final output should be in English.    
                 """
 
-system_01 = """You are an experienced research director specialized in improving and optimizing research areas for academic inquiry and effective web search, as well as in designing clear and logical research directions that guide researchers efficiently to efficiently gather relevant information, analyze data, and achieve meaningful results.".\n
+                # - Present guidance and instruction on each research topic in a well-structured report of at least 1000 words, ensuring that the instruction follows a directive format to guide the research process under the key 'research_direction.'
+
+system_01 = """You are an experienced research director specialized in improving and optimizing research areas for academic inquiry and effective web search, as well as in designing clear and logical research directions that guide researchers to efficiently gather relevant information, analyze data, and achieve meaningful results.
+            when the user ask something you start by saying "[리서치 디렉터 agent입니다.]",and summarize the request you've received.
+            output should be in English.  
             
+            1.you analyze and revise the provided research topics {research} based on the input plan and critique {plan}. Ensure the revised research topics are highly optimized for search engines, clear, specific, and aligned with the research goals.
+                - Extract the key objectives, constraints, and outcomes from the provided plan {plan}, and revise each research topic based on guidances from {plan}.
+                - Using the insights from the review note, systematically revise and enhance each research item in the 'research area' {research} by incorporating relevant keywords and phrases, replacing vague language with specific terms, and aligning them with the overall goals.
+                - Ensure that each research topic is precisely aligned with the overall research goals, emphasizing clarity, specificity, and relevance.
+                - **Optimize each research area for web search** by incorporating relevant keywords, phrases, and search-friendly structures. This will facilitate more effective information retrieval during the research process.
+                    - Replace demonstrative pronouns with explicit proper nouns and detailed, descriptive terms. This ensures that each research area is clear, specific, and unambiguous.
+                - Present the revised list clearly under the key 'research_area'.
+
+            2.Develop a comprehensive and detailed prompt for a Research Agent to investigate all topics in the revised research list. Ensure that all topics are addressed one by one and that the research instructions are structured and cover necessary aspects. Follow these steps for each topic:
+            
+                1.Heading: 
+                Clearly state the research topic at the beginning of the prompt. Ensure the topic is prominently displayed.   
+
+                2.Instructions: 
+                For each topic, Use the following framework to develop your instructions:
+
+                    - 1.Overview and Context:
+                        Instruct the Research Agent to start with a brief summary of the topic, explaining its significance and relevance. Includeany necessary background information that sets the context for the research.
+            
+                    - 2.Critical Questions and Key Points:
+                        Guide the Research Agent to identify and address at least five critical questions central to the topic. These questions should drive the research and highlight the key themes or issues that need to be explored.
+
+                    - 3.Key Quotes, Passages:
+                        create prompt for the Research Agent to extract and present at least five important quotes, passages, or data points relevant to the topic. Clearly explain the significance of each piece of evidence.
+                    
+                    - 4.Additional Considerations:
+                        Remind the Research Agent to highlight any additional factors and perspectives that should be considered, such as ethical concerns, historical context, or current trends. This ensure a well-rounded approach to the topic.    
+
+                    - 5.Analysis and Synthesis:
+                        Guide the Research Agent to synthesize the gathered information into a cohesive narrative or argument, ensuring the research forms a clear and logical structure.
+                            
+                    - 5.References:
+                        Instruct the Research Agent to compile a list of references or citations that should be included in the research. Ensure they follow proper citation formats and provide a comprehensive list of sources.
+                
+                    - 6.Further Questions:
+                        Encourage the Research Agent to list any additional questions that arise naturally from the topic. These questions should help refine the research focus or guide future exploration.
+
+                    - 7.Find potential Information Sources:
+                        create instruction for the Research Agent to find specific sources that will be useful for the research. Ensure that they include a variety of credible resources (e.g., books, articles)
+
+                    - Use bullet points and lists to enhance readability and clarity. Ensure that the instructions are directive and facilitate a structured research process.    
+
+                3.Create:
+                the instructions on each research topic should be at least 500 words in length, ensuring that the instruction follows a directive format to guide the research process.  
+
+                4.Proceed to Next Topic: 
+                After completing the research instructions for one topic, automatically proceed to the next topic in the revised list. Ensure that all topics are covered.
+
+                5.Group Instructions:
+                Once all prompts are created for each research topic, all instructions should be grouped together corresponding to each topic, and stored under the key 'research_direction'."""                
+                
+                                
+system_02 = """You are an experienced research director specialized in improving and optimizing research areas for academic inquiry and effective web search, as well as in designing clear and logical research directions that guide researchers efficiently to efficiently gather relevant information, analyze data, and achieve meaningful results.".\n
             when the user ask something you start by saying "[리서치 디렉터 agent입니다.]",and summarize the request you've received.\n
             
             1.you analyze and revise the provided research topics {research} based on the input plan and critique {plan}. Ensure the revised research topics are highly optimized for search engines, clear, specific, and aligned with the research goals.
@@ -463,28 +482,26 @@ system_01 = """You are an experienced research director specialized in improving
                     - Replace any vague language or demonstrative pronouns with explicit proper nouns and detailed, descriptive terms. This ensures that each research area is clear, specific, and unambiguous.
                 - Present the revised list clearly under the key 'research_area'.
 
-            2.conduct analysis of the revised research topics  
-                - Conduct an in-depth analysis of all the topics on the revised list one by one. \n
-                - The goal is to conduct a comprehensive analysis of the revised research topics, ensuring thorough exploration and guidance on researching each topic.
-                - For each topic, provide detailed guidance and prompts for effective research. This should include specific steps, key questions to address, and potential challenges to be aware of.
-                - The analysis for each topic should include **detailed exploration and intruction for reseaching each topic** that outlines the key research focus to be researched like the following sections: 
+            2.conduct analysis of the revised research topics and create detailed research guidance
+                - Conduct an in-depth analysis of all the topics on the revised list one by one. 
+                - The goal is to create detailed and comprehensive guidance and prompts for the research agent to conduct effective research. 
+                - For **each topich**,The detailed research guidance for the research agent should include **detailed exploration and intruction for reseaching **each topic** that outlines the key research focus to be researched like the following sections: 
                     - 1) Overview and Context: provide a brief summary of the topic, its significance, and any relevant background information.
                     - 2) Critical Questions and Key Points: Identify at least five main questions that should be answered when researching the topic. Highlight key issues or themes that need to be addressed.
-                    - 3) Potential information sources: find specific sources that would be useful for researching the topic, such as books, articles, databases, interviews, or other relevant materials.
+                    - 3) Finding potential information sources: find specific sources that would be useful for researching the topic, such as books, articles, databases, interviews, or other relevant materials.
                     - 4) Key Quotes, Passages and Data from the topic: extract at least five important quotes, passages, or data from the topic.
                     - 5) references: provide a list of any references or citations that should be included in the research.
                     - 6) Additional Considerations for the topic: highlight any additional factors that should be taken into account when researching the topic, such as ethical concerns, historical context, or current trends.
-                    - 7) questions that come to mind about the topic: List any questions that naturally arise from the topic, which could guide further exploration or clarify the research objectives.
+                    - 7) Questions that come to mind about the topic: List any questions that naturally arise from the topic, which could guide further exploration or clarify the research objectives.
 
-                - For **each** research topic:
-                    - Present guidance and instruction on each research topic in a well-structured report of at least 1000 words, ensuring that the report follows a directive format to guide the research process under the key 'research_direction.'
-                    - Use markdown formatting for clarity, including appropriate headings, bullet points, and other elements to enhance readability.
-                        - Number all sections and subsections to provide a clear and organized structure.  \n
-                - After completing the research on each topic, **automatically proceed** to the next topic in the list.\n
+                - Present guidance and instruction on each research topic in a well-structured report of at least 1000 words under the key 'research_direction', instruction for each topic is saved seperately in the list of string ensuring that the report follows a directive format to guide the research process.
+                - Use markdown formatting for clarity, including appropriate headings, bullet points, and other elements to enhance readability.
+                    - Number all sections and subsections to provide a clear and organized structure.  
+                - After completing the research on each topic, **automatically proceed** to the next topic in the list.
                 - Final output should be in English.  
                 """
 
-system_02 = """You are an experienced researcher on various areas such as art, science and other fields.\n 
+system_03 = """You are an experienced researcher on various areas such as art, science and other fields.\n 
             You find useful information to give an answer to the users.\n 
             You are verbose and logical.\n 
             when the user ask something you start by saying "[리서치 agent입니다.]",and summarize the request you've received.\n
@@ -516,6 +533,7 @@ system_02 = """You are an experienced researcher on various areas such as art, s
                 - Final output should be in English.     
             """
 
+            ###LEFTOVER    
             # - For each topic, provide detailed guidance and prompts for effective research. This should include specific steps, key questions to address, and potential challenges to be aware of.
             # - The goal is to conduct a comprehensive analysis of the revised research topics, ensuring thorough exploration and guidance on researching each topic.
             # Your task is to design a clear and logical research direction that guides researchers to efficiently gather relevant information, analyze data, and achieve meaningful results."
@@ -550,7 +568,6 @@ system_02 = """You are an experienced researcher on various areas such as art, s
             #     - This summary should synthesize the information gathered across all research areas, offering insights into various aspects of the topic.
             #     - A markdown-formatted summary of all findings, with clear headings and bullet points for easy navigation.
 
-
             #- Prioritize the revised research areas based on criteria such as relevance to key objectives, potential impact, and feasibility.
             # - Summarize these elements concisely to guide the revision of your research approach, ensuring that the summary reflects an understanding of the critic agent's insights and priorities.
             #  
@@ -565,43 +582,42 @@ system_02 = """You are an experienced researcher on various areas such as art, s
 research_director_prompt = ChatPromptTemplate.from_messages(
     [
     ("system", system_00),
-    ("human", "plan from critic: {plan} \n\n research topics from critic: {research}"),
+    ("human", "critique about the initial plan: {plan} \n\n research topics from critic: {research}"),
     ]
 )
 
-# researcher = researcher_prompt | llm_researcher
 research_director = research_director_prompt | structured_llm_research_director
-
 
 ### for researcher
 llm_researcher = ChatOpenAI(temperature=0, streaming=True, model="gpt-4o-2024-08-06")
 
-system_01 ="""You are an experienced researcher specialized in finding userful information. \n
-        when the user ask something you start by saying "[리서치 agent입니다.]".\n
+system_01 ="""You are an experienced researcher specialized in finding userful information. 
+        when the user ask something you start by saying "[리서치 agent입니다.]".
 
-        1.Research Direction and Topic:
-            - Identify the research direction within {research_direction} corresponding to the research topic {research} provided. Clarify the specific objectives and scope based on the instructions received.
-        
-        2.Search for Relevant Information and Present It:
-            - Understand the context of the research direction and the specific research task. Based on this understanding, conduct comprehensive research on the research topic {research}.
-            - Must Avoid simply restating or elaborating on instructions {research_direction}. Instead, focus on gathering new, relevant information that adds value to the research.
-            - Actively search for credible sources such as academic journals, books, interviews, and case studies that are directly related to {research}.
-            - Extract and present relevant data, quotes, and examples. Ensure that the information directly supports the objectives outlined in {research_direction}.
+        The output shoud be in English.
+
+        1.Research instruction and Topic:
+            - Identify the content related to the research topic {research} within the input {research_direction}. Based on the identified content, determine the research instructions corresponding to the research topic. Then, identify the specific objectives and areas to conduct detailed research based on the research instructions.
+
+        2.Search for Relevant Information:
+            - Follow the instructions to conduct a thorough and structured research on the assigned topic. Adhere to the guidelines for each section to ensure all aspects of the research are covered comprehensively.
+            - Must avoid simply restating or elaborating on the instructions. Instead, focus on gathering new, relevant information that adds value to the research.
+            - Actively find useful information from credible sources such as academic journals, books, interviews, article, news, and case studies that are directly related to {research} by using Tavily web_serach_tool.
+            - Extract and present relevant data, quotes, and examples. Ensure that the information directly supports the objectives outlined in the instructions.
             
-        3.Specific Tasks:
-            - Identify 3-5 academic sources (e.g., journals, articles) that provide insights into the intersection of technology and human perception.
-            - Locate and summarize 2-3 interviews with Kara Platoni that offer additional perspectives.
-            - Analyze at least 3 reviews or critiques of 'We Have the Technology' to understand its reception and contributions.
+        3.Additional Tasks:
+            - Find 5 academic sources (e.g., journals, articles) that provide insights into the intersection of technology and human perception. if possible, present the context of them.
+            - Find and summarize 5 interviews related to the topics that offer additional perspectives. if possible, provide the link.
+            - Incorporate at least 5 reviews or critiques about the topic to understand its reception and contributions. if possible, provide the link
             - Extract and present key quotes, passages, and case studies that directly relate to the topic.
+            - All results from additional tasks under the key 'additional information'.
 
         4.Generate Queries:
-            - Create appropriate search queries based on your summarization to help the user easily find additional information on the web under the key 'query'.\n
+            - Create appropriate search queries based on your summarization to help the user easily find additional information on the web under the key 'query'.
         
         5.Output:
-            - Provide a detailed report that includes all relevant information, quotes, and analysis. Ensure that the findings are integrated into a cohesive narrative that aligns with the research direction.
-            - Final output should be in English.     
+            - Provide a detailed 1000 words report that includes all relevant information, quotes, and analysis. Ensure that the findings are integrated into a cohesive narrative that aligns with the research topic.
             """
-
 
 system_02 ="""You are an experienced researcher specialized in finding userful information. \n
         when the user ask something you start by saying "[리서치 agent입니다.]".\n
@@ -620,26 +636,25 @@ system_02 ="""You are an experienced researcher specialized in finding userful i
             - Create appropriate search queries based on your summarization to help the user easily find additional information on the web under the key 'query'.\n
         """
 
-        # - - Next, conduct actual research according to the identified direction, finding relevant sources and reflecting them in the report, ensuring that you follow the guidelines and objectives outlined in {research_direction} corresponding to the research topic {research} provided.
+        ###LEFTOVER
+        # - Next, conduct actual research according to the identified direction, finding relevant sources and reflecting them in the report, ensuring that you follow the guidelines and objectives outlined in {research_direction} corresponding to the research topic {research} provided.
         # - Based on the user's input, summarize the research direction and topic to clarify the task, and present it to the user.
         # - Find relevant information on the given research topic {research} according to the research direction {research_direction}, your findings in at least 500 words, offering insights into various aspects of the topic.
 
 researcher_prompt = ChatPromptTemplate.from_messages(
     [
     ("system", system_01),
-    ("human", "The research direction you need to follow when conducting research: {research_direction} \n\n research topic is this: {research} \n\n original user's question:{question}"),
+     ("human", "The research directions you need to follow as prompts when conducting research: {research_direction} \n\n the research topic is this: {research} \n\n original user's question:{question}"),
     ]
 )
 
 researcher = researcher_prompt | llm_researcher
-
 
 ###for grader
 # llm_grader = ChatOpenAI(temperature=0, model="gpt-4-0125-preview")
 llm_grader = ChatOpenAI(temperature=0, model="gpt-4o-2024-08-06")
 
 structured_llm_grader = llm_grader.with_structured_output(GradeDocuments)
-
 
 # Prompt
 system = """You are a grader assessing relevance of a retrieved document to a user question. \n 
@@ -669,15 +684,14 @@ re_write_prompt = ChatPromptTemplate.from_messages(
     [
         ("system", system),
         (
-            "human",
-            "Here is the original question from the user: \n\n {question} \n\n and query for web search {retrieve_query} Formulate an improved query.",
+            "human", "Here is the original question from the user: \n\n {question} \n\n and query for web search {retrieve_query} Formulate an improved query.",
         ),
     ]
 )
 
 question_rewriter = re_write_prompt | llm_rewriter | StrOutputParser()
 
-### for generater
+### for generater - NOT USING AT THE MOMENT
 prompt = hub.pull("rlm/rag-prompt")
 llm_generate = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0, streaming=True)
 # llm = ChatOpenAI(model_name="gpt-4o", temperature=0, streaming=True)
@@ -706,25 +720,59 @@ cleaner_prompt = ChatPromptTemplate.from_messages(
 cleaner = cleaner_prompt | llm_cleaner
 
 ### for writer & analyst
-# llm_reporter = ChatOpenAI(model="gpt-4o-2024-08-06", temperature=0)
-llm_reporter = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+### GEMINI
+llm_reporter_gemini = ChatGoogleGenerativeAI(model="gemini-1.5-pro",
+      google_api_key="AIzaSyDe-IPl8xW7u1AZ8xTbsc9Qw04azIRO6mM",
+      convert_system_message_to_human = True,
+      verbose = True,
+)
 
-system = """You are an experienced analyst on various areas such as art, science and other fields.\n 
-            Your sole purpose is to write well written, critically acclaimed objective and structured reports on given text.
+# llm=ChatGoogleGenerativeAI(model="gemini-1.5-pro", temperature=0.7, google_api_key=os.getenv('GOOGLE_API_KEY'))
+# llm_reporter_gemini = ChatVertexAI(model="gemini-1.5-pro",temperature=0, max_tokens=None,max_retries=6,stop=None,)
+
+### OPENAI
+# llm_reporter = ChatOpenAI(model="gpt-4o-2024-08-06", temperature=0)
+# llm_reporter = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+
+system_01 = """You are an experienced analyst on various areas such as art, science and other fields.\n 
+            Your sole purpose is to write well written, critically acclaimed objective and structured reports on the given archive.
             You find useful information to give an answer to the users.\n 
             You are verbose and logical.\n 
             when the user ask something you start by saying "[분석 agent입니다.]",and summarize the request you've received.
 
-            you analyze {archive} that you are given and answer the following user's question: {question} in a detaied, well-structured, comprehensive report of minimum 4000 words that offers in-depth insights into various aspects of the archive. 
-                - You must break down your report into various detailed questions to draw a more accurate conclusion.
+            you analyze {archive} that you are given and answer the following user's question: {question} in a detaied, well-structured, comprehensive anlaysis of minimum 5000 words that offers in-depth insights into various aspects of the archive. 
+                - Develop a series of thoughtful and detailed questions related to the subject, then carefully answer each question. Use this process of self-reflection to deepen your understanding and arrive at a more accurate and well-rounded conclusion.
+                - You make a comprehensive judgement based on all the answer to formulate the conclusion.
                 - Do not oversimplify. Keep essential details intact.
                 - Structure your report in numbered sections,reflecting your expertise in art, science, and other relevant areas with appropriate use of headings and bullet points for easy navigation and readability.
-                - You explain the logical basis on which you reached that conclusion in a numbered format. 
-                - You make a comprehensive judgement based on all the answer to formulate the conclusion.
-                - you provide questions that come to mind about the topic: List any questions that naturally arise from the topic, which could guide further exploration or clarify the research objectives.
-                - you provide references in MLA format and markdown syntax.
-                - Final output should be in English.  
+                - You explain the logical basis on which you reached that conclusion in a numbered format.
+                - You present key quotes, passages, and case studies that directly relate to the topic.
+                - you provide potential information to look at. if possible, provide the link.
+                - you provide at least 10 questions that come to mind about the topic: List any questions that naturally arise from the topic, which could guide further exploration or clarify the research objectives.
+                - you provide detailed references in MLA format and markdown syntax.
+            
+            Final output should be in English.  
             """ 
+
+system_02 = """ You are an experienced analyst on various areas such as art, science and other fields.\n 
+            Your sole purpose is to write well written, critically acclaimed objective and structured reports on given text.
+            You find useful information to give an answer to the users.\n 
+            You are verbose and logical.\n 
+            when the user ask something you start by saying "[분석 agent입니다.]",and summarize the request you've received.
+            
+            Analyze the provided archive {archive} and answer the user’s question: {question} in a detailed, well-structured, and comprehensive report of at least 4000 words. The report should offer in-depth insights into various aspects of the archive, ensuring that each section contributes meaningfully to the overall analysis.
+                1.Question Development and Self-Reflection: Formulate a series of thoughtful, detailed questions related to the subject. Then, answer each question thoroughly, using this self-reflective process to deepen your understanding and enhance the accuracy of your conclusions.
+                2.Comprehensive Judgment and Conclusion: Synthesize all your answers to make a well-rounded judgment. Ensure your conclusion reflects a balanced consideration of all aspects, and avoid oversimplification while maintaining essential details.
+                3.Structured Report: Organize your report into numbered sections, clearly demonstrating your expertise in art, science, or other relevant areas. Use appropriate headings, bullet points, and subheadings for easy navigation and readability. Ensure that each section contributes to meeting the word count requirement by thoroughly exploring different angles.
+                4.Logical Explanation: Provide a numbered breakdown of the logical basis for your conclusions. Clearly explain the reasoning behind each key point and conclusion, making sure to elaborate on all necessary details to achieve the target word count.
+                5.Further Exploration: Suggest potential information to explore further, including additional resources or perspectives that might enrich the analysis.
+                6.Questions for Future Research: List any additional questions that naturally arise from the topic, which could guide further exploration or clarify the research objectives.
+                7. Detailed References: Provide thorough references in MLA format, using markdown syntax. Ensure that citations are comprehensive and well-organized, supporting your analysis with credible sources.
+            
+            Final output should be in English.
+            """
+            ### LEFTOVERS
+            #- You must break down your report into various detailed questions to draw a more accurate conclusion.
 
 reporter_prompt = ChatPromptTemplate.from_messages(
     [
@@ -733,10 +781,12 @@ reporter_prompt = ChatPromptTemplate.from_messages(
     ]                                
 )
 
-reporter = reporter_prompt | llm_reporter
+### GPT-4O
+# reporter = reporter_prompt | llm_reporter
+### GEMINI 1.5PRO
+reporter = reporter_prompt | llm_reporter_gemini
 
-
-### for publisher
+### for publisher - NOT USING AT THE MOMENT
 llm_analysis = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0)
 structured_llm_grader = llm_analysis.with_structured_output(GradeAnswer)
 
@@ -752,41 +802,6 @@ answer_prompt = ChatPromptTemplate.from_messages(
 )
 
 answer_grader = answer_prompt | structured_llm_grader
-
-
-def convert_text_to_list(text):
-    # 각 줄을 리스트로 나누기
-    lines = text.split('\n')
-
-    result = {}
-    current_key = None
-    current_sublist = []
-    research_list = []
-
-    for line in lines:
-        line = line.strip()
-        research_list.append(line)
-
-    #     if line.startswith("###"):
-    #         continue  # "### 개선된 계획" 부분은 무시합니다.
-        
-    #     if line.startswith("1.") or line.startswith("2.") or line.startswith("3.") or line.startswith("4.") or line.startswith("5."):
-    #         # 기존에 수집된 서브리스트를 저장
-    #         if current_key:
-    #             result[current_key] = current_sublist
-    #             current_sublist = []
-
-    #         # 새로운 키로 초기화
-    #         current_key = line
-    #     elif line.startswith("-"):
-    #         # 하위 항목을 서브리스트에 추가
-    #         current_sublist.append(line[1:].strip())
-
-    # # 마지막 서브리스트 추가
-    # if current_key:
-    #     result[current_key] = current_sublist
-
-    return research_list
 
 
 ### Nodes
@@ -823,6 +838,7 @@ def agent(state):
 
     # parsed_response = parse_response(response)
     # print(parsed_response)
+    
     return {"question": question, "plan": response, "research": response.research_area}
     # return {"messages": [response]}
 
@@ -849,14 +865,15 @@ def review(state):
     print('\n' + ">> 개선된 리서치 영역: {}".format(response.research_area)+ '\n')
 
     # print(response[0])
-    review_note = response.review_note
-    revised_plan = response.plan
+    #review_note = response.review_note
+    revised_plan = ''.join(response.plan) + response.review_note
     further_research_area = response.research_area
     
     research = further_research_area
     # print(">> 전체 리서치 영역: {}".format(research))
 
     return {"plan": response, "question": question, "research":research }
+
 
 ### for research director
 def research(state):
@@ -885,8 +902,8 @@ def research(state):
     
     # wrapped_research_area = textwrap.fill(response.research_area, width=80)
     # print('\n' + ">> 전체 response: {}".format(response))
-    print('\n' + ">> 리서치 영역: {}".format(response.research_area))
-    print('\n' + ">> 리서치 방법: {}".format(response.research_direction))
+    #print('\n' + ">> 리서치 영역: {}".format(response.research_area))
+    #print('\n' + ">> 리서치 방법: {}".format(response.research_direction))
 
     # wrapped_result = textwrap.fill(response.research_result, width=80)
     # print(">> 리서치 방법: {}".format(wrapped_result))
@@ -905,6 +922,7 @@ def research(state):
 
     return {"archive": archive, "question": question, "research_direction": research_direction, "research":response.research_area}
     # return {"plan": response.content, "question": question}
+
 
 ### for researcher
 def retrieve(state):
@@ -956,14 +974,19 @@ def retrieve(state):
 
         # Retrieval
         documents = retriever.get_relevant_documents(research[retrieve_count])
+
+        documents_content = []
+        for d in documents:
+            documents_content.append(d.page_content)
+
         # # return {"documents": documents, "question": research}
         retrieve_count = retrieve_count + 1
 
-        if retrieve_count > 3:
-        # if retrieve_count > len(research) - 1:
+        #if retrieve_count > 5:
+        if retrieve_count > len(research) - 1:
             retrieve_stop = "Yes"
         
-    return {"documents": documents, "archive":archive, "retrieve_stop": retrieve_stop, "retrieve_count": retrieve_count, "retrieve_query": research[retrieve_count - 1]}
+    return {"documents": documents_content, "archive":archive, "retrieve_stop": retrieve_stop, "retrieve_count": retrieve_count, "retrieve_query": research[retrieve_count - 1]}
 
 
 def grade_documents(state):
@@ -997,16 +1020,28 @@ def grade_documents(state):
     # Score each doc
     filtered_docs = []
     web_search = "No"
+    score = None
 
     for d in documents:
-        score_result = retrieval_grader.invoke({"retrieve_query": retrieve_query , "documents": d.page_content})
-        # print(">> score_result: {}".format(score_result))
-        print(">> doc length: {} | doc: {}".format(len(d.page_content), d.page_content))
-        score = score_result.binary_score
+        #score_result = retrieval_grader.invoke({"retrieve_query": retrieve_query , "documents": d.page_content})
+        # score_result = retrieval_grader.invoke({"retrieve_query": retrieve_query , "documents": d})
 
+        try:
+            score_result = retrieval_grader.invoke({"retrieve_query": retrieve_query, "documents": d})
+            score = score_result.binary_score
+        except Exception as e:
+            # Handle the error, e.g., log it, or assign a default value to score_result
+            print('\n' + ">> Error: {e}")
+            score = "No"
+
+        # print(">> score_result: {}".format(score_result))
+        #print(">> doc length: {} | doc: {}".format(len(d.page_content), d.page_content))
+        print(">> vector document length: {} | vector doc: {}".format(len(d), d))
+        
         if score == "yes":
             print(">> GRADE: GOOD 관련있는 문서!")
-            filtered_docs.append(d.page_content)
+            filtered_docs.append(d)
+            # filtered_docs.append(d.page_content)
             print(filtered_docs)
         else:
             print(">> GRADE: BAD 관련없는 문서!" + '\n')
@@ -1037,76 +1072,11 @@ def report(state):
     generation = reporter.invoke({"plan":plan, "archive": archive, "question":question})
     wrapped_generation = textwrap.fill(generation.content, width=120)
 
-    print(">> {}".format(wrapped_generation))
+    print('\n' + ">> REPORT: {}".format(wrapped_generation))
     
     return {"generation": generation}
 
 
-def generate(state):
-    """
-    Generate answer
-
-    Args:
-        state (dict): The current state
-
-    Returns:
-         dict: The updated state with re-phrased question
-    """
-    print(">> GENERATE ANSWER")
-    # messages = state["messages"]
-    documents = state["documents"]
-    question = state["question"]
-    # question = messages[0].content
-    # last_message = messages[-1]
-    # docs = last_message.content
-
-    # Post-processing
-    def format_docs(documents):
-        return "\n\n".join(doc.page_content for doc in documents)
-    
-    # print(">> raw: {}".format(documents))
-    print(">> formatted: {}".format(format_docs(documents)))
-
-    # Run
-    # generation = rag_chain.invoke({"context": documents, "question": question})
-    generation = rag_chain.invoke({"context": format_docs(documents), "question": question})
-    print(">> {}".format(generation))
-    
-    return {"generation": generation}
-
-
-def rewrite(state):
-    """
-    Transform the query to produce a better question.
-
-    Args:
-        state (messages): The current state
-
-    Returns:
-        dict: The updated state with re-phrased question
-    """
-    print(">> TRANSFORM QUERY")
-    # messages = state["messages"]
-    # question = messages[0].content
-
-    question = state["question"]
-    documents = state["documents"]
-
-    msg = [
-        HumanMessage(content=f""" \n Look at the input and try to reason about the underlying semantic intent / meaning. \n 
-        Here is the initial question:
-        \n ------- \n
-        {question} 
-        \n ------- \n
-        Formulate an improved question: """,
-        )
-    ]
-
-    # Grader
-    model = ChatOpenAI(temperature=0, model="gpt-4-0125-preview", streaming=True)
-    response = model.invoke(msg)
-    # return {"messages": [response]}
-    return {"question": response}
 
 
 def transform_query(state):
@@ -1159,18 +1129,16 @@ def web_search(state):
     ## documents.append(web_results)
 
     ### web search 02
-    
     # web_results = tavily_search_tool.search(retrieve_query, search_depth="advanced", include_raw_content=True, max_results=3)["results"]
 
     try:
-        web_results = tavily_search_tool.search(retrieve_query, search_depth="advanced", include_raw_content=True, max_results=2)["results"]
+        web_results = tavily_search_tool.search(retrieve_query, search_depth="advanced", include_raw_content=True, max_results=5)["results"]
     except HTTPError as e:
         print(f"An HTTP error occurred: {e}")
         web_results = []
     except Exception as e:  # 다른 모든 예외 처리
         print(f"An unexpected error occurred: {e}")
         web_results = []
-
 
     results = []
     for i in web_results:
@@ -1182,7 +1150,7 @@ def web_search(state):
             print('\n' + ">> CLEANED WEB RESULT: {}".format(cleaned_results.content))
             results.append(cleaned_results.content)
 
-        except BadRequestError as e:
+        except Exception as e:    
             if e.code == 400 and 'context_length_exceeded' in e.message:
                 print("Context length exceeded error occurred. Skipping this step and continuing.")
         # else:
@@ -1204,8 +1172,78 @@ def web_search(state):
 
     return {"archive":archive, "question": question}
 
+
+### NOT USING
+def generate(state):
+    """
+    Generate answer
+
+    Args:
+        state (dict): The current state
+
+    Returns:
+         dict: The updated state with re-phrased question
+    """
+    print(">> GENERATE ANSWER")
+    # messages = state["messages"]
+    documents = state["documents"]
+    question = state["question"]
+    # question = messages[0].content
+    # last_message = messages[-1]
+    # docs = last_message.content
+
+    # Post-processing
+    def format_docs(documents):
+        return "\n\n".join(doc.page_content for doc in documents)
+    
+    # print(">> raw: {}".format(documents))
+    print(">> formatted: {}".format(format_docs(documents)))
+
+    # Run
+    # generation = rag_chain.invoke({"context": documents, "question": question})
+    generation = rag_chain.invoke({"context": format_docs(documents), "question": question})
+    print(">> {}".format(generation))
+    
+    return {"generation": generation}
+
+
+### NOT USING
+def rewrite(state):
+    """
+    Transform the query to produce a better question.
+
+    Args:
+        state (messages): The current state
+
+    Returns:
+        dict: The updated state with re-phrased question
+    """
+    print(">> TRANSFORM QUERY")
+    # messages = state["messages"]
+    # question = messages[0].content
+
+    question = state["question"]
+    documents = state["documents"]
+
+    msg = [
+        HumanMessage(content=f""" \n Look at the input and try to reason about the underlying semantic intent / meaning. \n 
+        Here is the initial question:
+        \n ------- \n
+        {question} 
+        \n ------- \n
+        Formulate an improved question: """,
+        )
+    ]
+
+    # Grader
+    model = ChatOpenAI(temperature=0, model="gpt-4-0125-preview", streaming=True)
+    response = model.invoke(msg)
+    # return {"messages": [response]}
+    return {"question": response}
+
 # print("*" * 20 + "Prompt[rlm/rag-prompt]" + "*" * 20)
 # prompt = hub.pull("rlm/rag-prompt").pretty_print()  # Show what the prompt looks like
+
 
 ### Edges
 def decide_to_archive(state):
@@ -1223,7 +1261,6 @@ def decide_to_archive(state):
     state["documents"]
     web_search = state["web_search"]
     
-
     if web_search == "Yes":
         # All documents have been filtered check_relevance
         # We will re-generate a new query
@@ -1243,7 +1280,6 @@ def decide_to_stop(state):
         print(">> DECISION: OK - TIME TO STOP")
         return "generate"
 
-
     else:
         print("DECISION: CARRY ON THE PROCESS")
         return "researcher"
@@ -1258,10 +1294,10 @@ def decide_to_report(state):
         return "reporter"
 
     else:
-        print("DECISION: CARRY ON THE PROCESS")
+        print("DECISION: CARRY ON THE RESERACH PROCESS")
         return "grader"
 
-    
+### NOT USING        
 def decide_to_publish(state):
     """
     Determines whether the generation is grounded in the document and answers question.
@@ -1272,7 +1308,6 @@ def decide_to_publish(state):
     Returns:
         str: Decision for next node to call
     """
-
     print('\n' + ">> CHECK QUALITY")
     question = state["question"]
     documents = state["documents"]
@@ -1311,19 +1346,16 @@ workflow.add_node("critic", review) #critic
 workflow.add_node("research_director",research) #researcher
 workflow.add_node("researcher", retrieve)  # retrieve
 workflow.add_node("grader", grade_documents)
-# workflow.add_node("rewrite", rewrite)  # Re-writing the question
-# workflow.add_node("generate", generate)  # Generating a response after we know the documents are relevant
 workflow.add_node("reporter", report) #final report
 workflow.add_node("transform_query", transform_query)  # transform_query
 workflow.add_node("web_search_node", web_search)  # web search
-
 
 workflow.add_edge(START, "agent")
 workflow.add_edge("agent", "critic")
 workflow.add_edge("critic", "research_director")
 workflow.add_edge("research_director", "researcher")
-# workflow.add_edge("retrieve", END)
 
+# workflow.add_edge("retrieve", END) #FOR TEST
 # workflow.add_edge("retrieve", "grader")
 
 workflow.add_conditional_edges(
@@ -1349,6 +1381,9 @@ workflow.add_conditional_edges(
 workflow.add_edge("transform_query", "web_search_node")
 workflow.add_edge("web_search_node", "researcher")
 
+workflow.add_edge("reporter", END)
+
+#----------------------------------
 # # workflow.add_conditional_edges(
 # #     "web_search_node",
 # #     decide_to_stop,
@@ -1360,9 +1395,6 @@ workflow.add_edge("web_search_node", "researcher")
 
 # workflow.add_edge("web_search_node", "generate")
 
-workflow.add_edge("reporter", END)
-
-
 # workflow.add_conditional_edges(
 #     "generate",
 #     decide_to_publish,
@@ -1370,12 +1402,13 @@ workflow.add_edge("reporter", END)
 #         "useful": END,
 #         "not useful": "transform_query",
 #     },
-
 # )
 
 # workflow.add_edge("generate", END)
 # workflow.add_edge("rewrite", "agent")
+#----------------------------------
 
+### setting recursion limit
 config = RunnableConfig(recursion_limit=100)
 print(config)
 
@@ -1385,8 +1418,6 @@ graph = workflow.compile()
 # 컴파일된 그래프 반환
 def get_graph():
     return graph
-
-#setting cursion limit
 
 # while True:
 #     user_input = input("User: ")
