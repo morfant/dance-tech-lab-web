@@ -103,7 +103,7 @@ docs_list = [item for sublist in docs for item in sublist]
 # print(docs_list)
 
 text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-    chunk_size=400, chunk_overlap=50
+    chunk_size=500, chunk_overlap=50
 )
 doc_splits = text_splitter.split_documents(docs_list)
 
@@ -116,7 +116,7 @@ vectorstore = Chroma.from_documents(
     collection_name="rag-chroma",
     embedding=OpenAIEmbeddings(),
 )
-retriever = vectorstore.as_retriever()
+retriever = vectorstore.as_retriever(search_kwargs={"k": 6})
 
 
 class GradeDocuments(BaseModel):
@@ -192,7 +192,6 @@ tavily_search_tool = TavilyClient(api_key="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
 # results_02 = web_search_tool.invoke({"query": query})
 
 ### variables
-
 max_retries = 3
 
 
@@ -302,10 +301,10 @@ system ="""you are a professional critic with a lot of experiences who critique 
                     - 'research_areas': A numbered list of areas requiring further research, with explanations for each.
                 - Final output should be in English.    
 
-            6. Feedback and Iteration**:
-                - If the user provides feedback on the critique or plan, incorporate it into an updated version.
-                - Always confirm with the user if the revisions meet their expectations or if further adjustments are needed.
             """
+            # 6. Feedback and Iteration**:
+            #     - If the user provides feedback on the critique or plan, incorporate it into an updated version.
+            #     - Always confirm with the user if the revisions meet their expectations or if further adjustments are needed.
   
 # system ="""You are a professional critic with extensive experience in evaluating content provided by other agents, offering better approaches or perspectives. 
 #             You are concise and logical. 
@@ -539,7 +538,7 @@ system_03 = """You are an experienced researcher on various areas such as art, s
                 - Final output should be in English.     
             """
 
-            ###LEFTOVER    
+            ### LEFTOVERS   
             # - For each topic, provide detailed guidance and prompts for effective research. This should include specific steps, key questions to address, and potential challenges to be aware of.
             # - The goal is to conduct a comprehensive analysis of the revised research topics, ensuring thorough exploration and guidance on researching each topic.
             # Your task is to design a clear and logical research direction that guides researchers to efficiently gather relevant information, analyze data, and achieve meaningful results."
@@ -642,7 +641,7 @@ system_02 ="""You are an experienced researcher specialized in finding userful i
             - Create appropriate search queries based on your summarization to help the user easily find additional information on the web under the key 'query'.\n
         """
 
-        ###LEFTOVER
+        ### LEFTOVER
         # - Next, conduct actual research according to the identified direction, finding relevant sources and reflecting them in the report, ensuring that you follow the guidelines and objectives outlined in {research_direction} corresponding to the research topic {research} provided.
         # - Based on the user's input, summarize the research direction and topic to clarify the task, and present it to the user.
         # - Find relevant information on the given research topic {research} according to the research direction {research_direction}, your findings in at least 500 words, offering insights into various aspects of the topic.
@@ -663,20 +662,20 @@ llm_grader = ChatOpenAI(temperature=0, model="gpt-4o-2024-08-06")
 structured_llm_grader = llm_grader.with_structured_output(GradeDocuments)
 
 # Prompt
-system = """You are a grader assessing relevance of a retrieved document to a user question. \n 
-If the document contains keyword(s) or semantic meaning related to the question, grade it as relevant. \n
-Give a binary score 'yes' or 'no' score to indicate whether the document is relevant to the question. \n
+system = """You are a grader assessing relevance of a retrieved document {documents} to input query {retrieve_query}.\n 
+If the document contains keyword(s) or semantic meaning related to the question, grade it as relevant.\n
+It does not need to be a stringent test. The goal is to filter out erroneous retrievals.\n
+Give a binary score 'yes' or 'no' score to indicate whether the document is relevant to the question.\n
 """
 
 grade_prompt = ChatPromptTemplate.from_messages(
     [
     ("system", system),
-    ("human", "Retrieved document: \n\n {documents} \n\n query for retreive: {retrieve_query}"),
+    ("human", "Retrieved document: \n\n {documents} \n\n input query:: {retrieve_query}"),
     ]
 )
 
 retrieval_grader = grade_prompt | structured_llm_grader
-
 
 ###for Querry Re-writer
 llm_rewriter = ChatOpenAI(model="gpt-4o", temperature=0)
@@ -897,6 +896,7 @@ def research(state):
     while not success and retry_count < max_retries:
         try:
             response = research_director.invoke({"plan": plan, "research": research, "question": question})
+            success = True  # 요청 성공 시 while 루프 탈출
 
         except Exception as e:
                 print(f"Error occurred: {e}. Retrying... ({retry_count + 1}/{max_retries})")
@@ -1297,7 +1297,7 @@ def decide_to_archive(state):
         return "transform_query"
     else:
         # We have relevant documents, so generate answer
-        print(">> DECISION: OK - archiveD")
+        print(">> DECISION: OK - archived")
         return "researcher"
     
 
