@@ -180,7 +180,7 @@ class GraphState(TypedDict):
     retrieve_count: int   
 
 
-#TAVILY API
+### TAVILY API
 tavily_search_tool = TavilyClient(api_key="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")
 
 # content = client.search("What happened in the latest burning man floods?", search_depth="advanced")["results"]
@@ -190,6 +190,11 @@ tavily_search_tool = TavilyClient(api_key="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
 # #TAVILY - langchain
 # web_search_tool = TavilySearchResults(k=5)
 # results_02 = web_search_tool.invoke({"query": query})
+
+### variables
+
+max_retries = 3
+
 
 
 #WEB SCRAPING
@@ -954,13 +959,23 @@ def retrieve(state):
     #     print(r)
     if retrieve_stop == "No":
         print(">> 요청받은 리서치 영역: {}".format(research[retrieve_count]))    
-        print('\n' + ">> retrieve_count: {} | {}".format(retrieve_count, research[retrieve_count]))    
+        print('\n' + ">> retrieve_count: {} | {}".format(retrieve_count, research[retrieve_count]))  
 
-        # invoke researcher here
-        response = researcher.invoke({"research_direction": research_direction, "research": research[retrieve_count], "question":question})
-        wrapped_result = textwrap.fill(response.content, width=120)
-        print(">> 요청받은 리서치 결과: {}".format(wrapped_result))
+        while not success and retry_count < max_retries:
+            try:
+                # invoke researcher here
+                response = researcher.invoke({"research_direction": research_direction, "research": research[retrieve_count], "question": question})
+                wrapped_result = textwrap.fill(response.content, width=120)
+                print(">> 요청받은 리서치 결과: {}".format(wrapped_result))
+                success = True  # 요청 성공 시 while 루프 탈출
 
+            except Exception as e:
+                print(f"Error occurred: {e}. Retrying... ({retry_count + 1}/{max_retries})")
+                retry_count += 1
+
+        if not success:
+            print(">> 요청 실패: 최대 재시도 횟수를 초과했습니다.")
+       
         if archive == None:
             archive = []
             if response.content != '':        
