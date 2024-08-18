@@ -42,8 +42,11 @@ from tavily import TavilyClient
 from typing import Annotated, List
 import textwrap
 
-###
+### LLM
 from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_google_vertexai import ChatVertexAI
+from langchain_community.utilities import GoogleSerperAPIWrapper
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain import hub
@@ -54,9 +57,8 @@ from langchain_core.messages import BaseMessage, HumanMessage
 from langchain_core.prompts import PromptTemplate
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
+
 from langgraph.prebuilt import tools_condition
-from langchain import hub
 from langchain.schema import Document
 import json
 import re
