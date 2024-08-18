@@ -124,7 +124,7 @@ class Review(BaseModel):
 
 
 class initialPlan(BaseModel):
-    explantion: str = Field(description="logical explanation how you set up the plan")
+    explanation: str = Field(description="logical explanation how you set up the plan")
     plan: List[str] = Field(description="The step by step plan to accomplish user's reuquest")
     research_area: List[str] = Field(description="The research_area is the list of the area that requires further research")
 
@@ -234,6 +234,7 @@ def scrape_webpages(urls: List[str]) -> str:
 
 ###LLM
 
+
 #for agent
 llm_agent = ChatOpenAI(temperature=0, streaming=True, model="gpt-4o")
 structured_llm_agent = llm_agent.with_structured_output(initialPlan)
@@ -272,7 +273,7 @@ system = """You are a professional assistant helping the user to find informatio
             # You first understand the context of the request made by the uesr and devise a step-by-step plan with great detial to accomplish what the user request, and suggest that to users. \n 
             # You make a numbered list of what needs to be done to accomplish what the user request, and present your plan to the user with the key 'plan'.\n 
             # Identify areas that require extensive research to accomplish your plan, and present them in a numbered list with the key 'research_area.\n
-            # You explain the logical basis on which you set up the plan and research area with the key 'explantion'. \n 
+            # You explain the logical basis on which you set up the plan and research area with the key 'explanation'. \n 
 
 # system = """You are a professional assistant help user to find information. \n 
 #             When the user ask or request something, you start response by saying "[매니저입니다.] \n
@@ -809,11 +810,11 @@ def agent(state):
     # print(response)
     # print('\n' + ">> manager: {}".format(response.content))
 
-    wrapped_explanation = textwrap.fill(response.explantion, width=80)
+    wrapped_explanation = textwrap.fill(response.explanation, width=80)
     # wrapped_plan = textwrap.fill(response.plan, width=70)
     # wrapped_research_area = textwrap.fill(response.research_area, width=70)
     print('\n' + ">> 설명: {}".format(wrapped_explanation)) 
-    # print(">> 설명: {}".format(response.explantion))
+    # print(">> 설명: {}".format(response.explanation))
     print('\n' + ">> 실행 계획: {}".format(response.plan))
     print('\n'+ ">> 리서치 영역: {}".format(response.research_area))
 
