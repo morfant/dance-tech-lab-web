@@ -890,9 +890,21 @@ def research(state):
     archive = state["archive"]
     research_direction = state["research_direction"]
 
+    retry_count = 0
+    success = False
+
     # print(">> 리서치 계획 from 비평agent: {}".format(plan))
-    
-    response = research_director.invoke({"plan": plan, "research": research, "question": question})
+    while not success and retry_count < max_retries:
+        try:
+            response = research_director.invoke({"plan": plan, "research": research, "question": question})
+
+        except Exception as e:
+                print(f"Error occurred: {e}. Retrying... ({retry_count + 1}/{max_retries})")
+                retry_count += 1
+
+    if not success:
+            print(">> 요청 실패: 최대 재시도 횟수를 초과했습니다.")
+
     # print('\n' + ">> researcher: {}".format(response.content))
 
     # result = convert_text_to_list(plan)
@@ -960,6 +972,9 @@ def retrieve(state):
     if retrieve_stop == "No":
         print(">> 요청받은 리서치 영역: {}".format(research[retrieve_count]))    
         print('\n' + ">> retrieve_count: {} | {}".format(retrieve_count, research[retrieve_count]))  
+
+        retry_count = 0
+        success = False
 
         while not success and retry_count < max_retries:
             try:
@@ -1091,8 +1106,6 @@ def report(state):
     print('\n' + ">> REPORT: {}".format(wrapped_generation))
     
     return {"generation": generation}
-
-
 
 
 def transform_query(state):
