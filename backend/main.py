@@ -7,6 +7,7 @@ import asyncio
 # from agent import get_graph  # 에이전트 가져오기
 from agents_ import get_graph  # 에이전트 가져오기
 from agents_ import initialPlan, Review, Research
+from langchain_core.messages import AIMessage
 
 def find_instance_of(d, cls):
     """
@@ -27,16 +28,20 @@ def find_instance_of(d, cls):
     return None
 
 
-def object_to_json_string(obj):
+def object_to_json_string(obj, key_to_remove='documents'):
     """
-    객체를 JSON 문자열로 변환하는 함수.
+    객체에서 특정 키를 제거한 후 JSON 문자열로 변환하는 함수.
     
     Args:
         obj (dict): 변환할 객체.
+        key_to_remove (str, optional): 제거할 키. 기본값은 None.
         
     Returns:
         str: JSON 문자열.
     """
+    if key_to_remove and key_to_remove in obj:
+        del obj[key_to_remove]
+    
     try:
         # 객체를 JSON 문자열로 변환
         json_string = json.dumps(obj, ensure_ascii=False, indent=4)
@@ -62,6 +67,27 @@ def get_value_from_json(json_string, key):
         
         # 키의 값을 반환
         return json_dict.get(key, None)
+    except json.JSONDecodeError as e:
+        return f"Error decoding JSON: {e}"
+
+
+def has_key_in_json(json_string, key):
+    """
+    JSON 문자열에서 특정 키의 존재 여부를 검사하는 함수.
+    
+    Args:
+        json_string (str): JSON 문자열.
+        key (str): 검사할 키.
+        
+    Returns:
+        bool: 키의 존재 여부.
+    """
+    try:
+        # JSON 문자열을 Python 딕셔너리로 변환
+        json_dict = json.loads(json_string)
+        
+        # 키의 존재 여부를 반환
+        return key in json_dict
     except json.JSONDecodeError as e:
         return f"Error decoding JSON: {e}"
 
@@ -135,6 +161,7 @@ async def websocket_chat(websocket: WebSocket):
                     initialPlan_ = find_instance_of(value, initialPlan)
                     review_ = find_instance_of(value, Review)
                     research_ = find_instance_of(value, Research)
+                    generation_ = find_instance_of(value, AIMessage)
 
                     # print("****************")
                     # print(type(initialPlan_))
@@ -148,21 +175,29 @@ async def websocket_chat(websocket: WebSocket):
 
                     elif research_ != None:
                         response_message = format_research_response(research_)
+
+                    elif generation_ != None:
+                        response_message = generation_.content
+                        
                     else:
                         print("--------------Other types--------------")
                         response_message = object_to_json_string(value)
                         research_direction_ = get_value_from_json(response_message, "research_direction")
+
                         if research_direction_ != None:
                             response_message = research_direction_
+                        elif has_key_in_json(response_message, 'archive'):
+                            response_message = None
                         
                     print("response_message: ", response_message)
+                    print("key: ", key)
 
                     # 타이핑 효과를 위해, 실시간으로 클라이언트에게 부분적으로 응답을 전송
                     if response_message != None:
                         for char in response_message[len(partial_message):]:
                             partial_message += char
                             await websocket.send_json({"response": partial_message, "agentType": key})
-                            await asyncio.sleep(0.001)  # 타이핑 딜레이
+                            await asyncio.sleep(0.0001)  # 타이핑 딜레이
                     partial_message = ""
 
                     await websocket.send_json({"response": "[END]", "agentType": key})

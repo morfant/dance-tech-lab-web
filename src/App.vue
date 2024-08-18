@@ -36,7 +36,7 @@
             :disabled="isFetching"
           />
           <button @click="handleButtonClick" class="send-button">
-            {{ isFetching ? "Sending..." : "Send" }}
+            {{ isFetching ? "......" : "Send" }}
           </button>
         </div>
       </div>
@@ -74,7 +74,7 @@ export default {
 
 
         if (data.response === "[END]"){
-          if (data.agentType === "generate") {
+          if (data.agentType === "reporter") {
             this.isFetching = false;
           }
         } else {
