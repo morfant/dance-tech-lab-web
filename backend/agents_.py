@@ -149,6 +149,10 @@ class Research(BaseModel):
     research_direction: str = Field(description="groups of research instructions for each research topic to conduct in-depth research on topics")
     research_area: List[str] = Field(description="The research_area is the list of the area that requires further research")
 
+class Result(BaseModel):
+    report: str = Field(description="the finalised report")
+
+
 # class AgentState(TypedDict):
 #     # The add_messages function defines how an update should be processed
 #     # Default is to replace. add_messages says "append"
@@ -726,18 +730,21 @@ cleaner = cleaner_prompt | llm_cleaner
 
 ### for writer & analyst
 ### GEMINI
-llm_reporter_gemini = ChatGoogleGenerativeAI(model="gemini-1.5-pro",
-      google_api_key="AIzaSyDe-IPl8xW7u1AZ8xTbsc9Qw04azIRO6mM",
-      convert_system_message_to_human = True,
-      verbose = True,
-)
+# llm_reporter_gemini = ChatGoogleGenerativeAI(model="gemini-1.5-pro",
+#       google_api_key="AIzaSyDe-IPl8xW7u1AZ8xTbsc9Qw04azIRO6mM",
+#       convert_system_message_to_human = True,
+#       verbose = True,
+# )
+
+# structured_llm_reporter_gemini = llm_reporter_gemini.with_structured_output(Result)
 
 # llm=ChatGoogleGenerativeAI(model="gemini-1.5-pro", temperature=0.7, google_api_key=os.getenv('GOOGLE_API_KEY'))
 # llm_reporter_gemini = ChatVertexAI(model="gemini-1.5-pro",temperature=0, max_tokens=None,max_retries=6,stop=None,)
 
 ### OPENAI
 # llm_reporter = ChatOpenAI(model="gpt-4o-2024-08-06", temperature=0)
-# llm_reporter = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+llm_reporter = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+structured_llm_reporter = llm_reporter.with_structured_output(Result)
 
 system_01 = """You are an experienced analyst on various areas such as art, science and other fields.\n 
             Your sole purpose is to write well written, critically acclaimed objective and structured reports on the given archive.
@@ -755,6 +762,8 @@ system_01 = """You are an experienced analyst on various areas such as art, scie
                 - you provide potential information to look at. if possible, provide the link.
                 - you provide at least 10 questions that come to mind about the topic: List any questions that naturally arise from the topic, which could guide further exploration or clarify the research objectives.
                 - you provide detailed references in MLA format and markdown syntax.
+
+            present your analysis under the key 'result'       
             
             Final output should be in English.  
             """ 
@@ -781,15 +790,18 @@ system_02 = """ You are an experienced analyst on various areas such as art, sci
 
 reporter_prompt = ChatPromptTemplate.from_messages(
     [
-    ("system", system),
+    ("system", system_01),
     ("human", "plan: \n\n {plan} \n\n archive: {archive} \n\n original user's question: {question}"),
     ]                                
 )
 
 ### GPT-4O
 # reporter = reporter_prompt | llm_reporter
+structured_llm_reporter = reporter_prompt | structured_llm_reporter
+
 ### GEMINI 1.5PRO
-reporter = reporter_prompt | llm_reporter_gemini
+# reporter = reporter_prompt | llm_reporter_gemini
+# structured_llm_reporter_gemini = reporter_prompt | structured_llm_reporter_gemini
 
 ### for publisher - NOT USING AT THE MOMENT
 llm_analysis = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0)
@@ -801,7 +813,7 @@ system = """You are a grader assessing whether an answer addresses / resolves a 
 
 answer_prompt = ChatPromptTemplate.from_messages(
     [
-        ("system", system),
+        ("system", system_01),
         ("human", "User question: \n\n {question} \n\n LLM generation: {generation}"),
     ]
 )
@@ -1013,8 +1025,8 @@ def retrieve(state):
         # # return {"documents": documents, "question": research}
         retrieve_count = retrieve_count + 1
 
-        #if retrieve_count > 5:
-        if retrieve_count > len(research) - 1:
+        if retrieve_count > 2:
+        # if retrieve_count > len(research) - 1:
             retrieve_stop = "Yes"
         
     return {"documents": documents_content, "archive":archive, "retrieve_stop": retrieve_stop, "retrieve_count": retrieve_count, "retrieve_query": research[retrieve_count - 1]}
@@ -1100,9 +1112,9 @@ def report(state):
     archive = state["archive"]
     question = state["question"]
 
-    generation = reporter.invoke({"plan":plan, "archive": archive, "question":question})
-    wrapped_generation = textwrap.fill(generation.content, width=120)
-
+    # generation = structured_llm_reporter_gemini.invoke({"plan":plan, "archive": archive, "question":question}) #GEMINI
+    generation = structured_llm_reporter.invoke({"plan":plan, "archive": archive, "question":question}) #OPENAI
+    wrapped_generation = textwrap.fill(generation.report, width=120)
     print('\n' + ">> REPORT: {}".format(wrapped_generation))
     
     return {"generation": generation}
@@ -1161,7 +1173,7 @@ def web_search(state):
     # web_results = tavily_search_tool.search(retrieve_query, search_depth="advanced", include_raw_content=True, max_results=3)["results"]
 
     try:
-        web_results = tavily_search_tool.search(retrieve_query, search_depth="advanced", include_raw_content=True, max_results=5)["results"]
+        web_results = tavily_search_tool.search(retrieve_query, search_depth="advanced", include_raw_content=True, max_results=1)["results"]
     except HTTPError as e:
         print(f"An HTTP error occurred: {e}")
         web_results = []

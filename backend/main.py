@@ -6,8 +6,9 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 import asyncio
 # from agent import get_graph  # 에이전트 가져오기
 from agents_ import get_graph  # 에이전트 가져오기
-from agents_ import initialPlan, Review, Research
+from agents_ import initialPlan, Review, Research, Result
 from langchain_core.messages import AIMessage
+from langchain_core.runnables.config import RunnableConfig
 
 def find_instance_of(d, cls):
     """
@@ -136,6 +137,8 @@ app = FastAPI()
 # 컴파일된 그래프 가져오기
 graph = get_graph()
 
+config = RunnableConfig(recursion_limit=100)
+
 @app.websocket("/ws/chat")
 async def websocket_chat(websocket: WebSocket):
     await websocket.accept()
@@ -150,7 +153,7 @@ async def websocket_chat(websocket: WebSocket):
             partial_message = ""
 
             inputs = {"question": user_input}
-            for output in graph.stream(inputs):
+            for output in graph.stream(inputs,config):
                 for key, value in output.items():
                     print('\n')
                     pprint.pprint(f">> Node: [{key}]")
@@ -161,7 +164,8 @@ async def websocket_chat(websocket: WebSocket):
                     initialPlan_ = find_instance_of(value, initialPlan)
                     review_ = find_instance_of(value, Review)
                     research_ = find_instance_of(value, Research)
-                    generation_ = find_instance_of(value, AIMessage)
+                    # generation_ = find_instance_of(value, AIMessage)
+                    generation_ = find_instance_of(value, Result) 
 
                     # print("****************")
                     # print(type(initialPlan_))
@@ -177,7 +181,8 @@ async def websocket_chat(websocket: WebSocket):
                         response_message = format_research_response(research_)
 
                     elif generation_ != None:
-                        response_message = generation_.content
+                        # response_message = generation_.content
+                        response_message = generation_.report
                         
                     else:
                         print("--------------Other types--------------")
@@ -197,7 +202,7 @@ async def websocket_chat(websocket: WebSocket):
                         for char in response_message[len(partial_message):]:
                             partial_message += char
                             await websocket.send_json({"response": partial_message, "agentType": key})
-                            await asyncio.sleep(0.0001)  # 타이핑 딜레이
+                            await asyncio.sleep(0.00001)  # 타이핑 딜레이
                     partial_message = ""
 
                     await websocket.send_json({"response": "[END]", "agentType": key})
