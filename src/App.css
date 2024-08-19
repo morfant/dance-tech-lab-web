@@ -98,6 +98,31 @@ h1 {
   color: #fff;
 }
 
+.message.agent {
+  background-color: #f7e4b6; /* 에이전트 메시지 색상 - 부드러운 노란색 */
+  color: #000; /* 글자 색상 - 검은색 */
+}
+
+.message.critic {
+  background-color: #d4a5a5; /* 비평가 메시지 색상 - 부드러운 붉은색 */
+  color: #fff; /* 글자 색상 - 흰색 */
+}
+
+.message.research_director {
+  background-color: #b6e4d0; /* 연구 디렉터 메시지 색상 - 부드러운 녹색 */
+  color: #000; /* 글자 색상 - 검은색 */
+}
+
+.message.researcher {
+  background-color: #a5b8d4; /* 연구원 메시지 색상 - 부드러운 파란색 */
+  color: #fff; /* 글자 색상 - 흰색 */
+}
+
+.message.reporter {
+  background-color: #d4b8a5; /* 리포터 메시지 색상 - 부드러운 주황색 */
+  color: #000; /* 글자 색상 - 검은색 */
+}
+
 .input-container {
   display: flex;
   padding: 10px 10px 10px 20px;

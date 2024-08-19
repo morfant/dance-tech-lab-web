@@ -22,7 +22,7 @@
           <div
             v-for="(message, index) in messages"
             :key="index"
-            :class="['message', message.sender]"
+            :class="['message', message.agentType]"
             v-html="renderMessage(message.text)"
           ></div>
           <div v-if="isFetching" class="loading-indicator">응답을 받아오는 중입니다...</div>
@@ -84,10 +84,12 @@ export default {
             this.messages[this.messages.length - 1].sender === "Bot" &&
             this.messages[this.messages.length - 1].agentType === agentType
           ) {
+            // msg block에 내용 업데이트
             const lastMessage = this.messages[this.messages.length - 1];
             lastMessage.text = response;
           } else {
-            this.messages.push({ sender: "Bot", text: response, agentType });
+            // msg block 새로 만듦
+            this.messages.push({ sender: "Bot", text: response, agentType: agentType });
           }
           // this.isFetching = false; // 데이터 수신 후 로딩 상태 해제
         }
