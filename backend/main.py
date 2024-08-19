@@ -198,30 +198,15 @@ async def websocket_chat(websocket: WebSocket):
                     print("response_message: ", response_message)
                     print("key: ", key)
 
-                    if response_message != None:
-                        await websocket.send_json({"response": response_message, "agentType": key})
-
                     # 타이핑 효과를 위해, 실시간으로 클라이언트에게 부분적으로 응답을 전송
-                    # if response_message != None:
-                    #     # buffer_size = 100   
-                    #     # buffer = ""  # 버퍼 초기화
-                    #     for char in response_message[len(partial_message):]:
-                    #         partial_message += char
-                    #         # buffer += char
+                    chunk_size = 2  # 한 번에 보낼 글자의 수를 설정, 클수록 출력 빠름
+                    if response_message != None:
+                        for i in range(len(partial_message), len(response_message), chunk_size):
+                            partial_message += response_message[i:i+chunk_size]
+                            await websocket.send_json({"response": partial_message, "agentType": key})
+                            await asyncio.sleep(0.001)  # 타이핑 딜레이
+                    partial_message = ""
 
-                    #         # if len(buffer) >= buffer_size :
-                    #             # partial_message += buffer
-                    #             # await websocket.send_json({"response": partial_message, "agentType": key})
-
-                    #         await websocket.send_json({"response": partial_message, "agentType": key})
-                    #         # buffer = ""  # 버퍼 초기화
-
-                    #     # if buffer:
-                    #     #     partial_message += buffer
-                    #     #     await websocket.send_json({"response": partial_message, "agentType": key})
-
-                    #         # await asyncio.sleep(0.0000000000000001)  # 타이핑 딜레이
-                    # partial_message = ""
 
                     await websocket.send_json({"response": "[END]", "agentType": key})
 
