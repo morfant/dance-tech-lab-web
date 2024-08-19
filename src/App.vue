@@ -12,8 +12,6 @@
           {{ menu }}
         </li>
       </ul>
-
-
     </div>
     <div class="main-container">
       <div class="chat-container">
@@ -33,9 +31,13 @@
             @keyup.enter="handleButtonClick"
             placeholder="Type a message..."
             class="input-box"
-            :disabled="isFetching"
+            :disabled="isFetching || !isConnected"
           />
-          <button @click="handleButtonClick" class="send-button">
+          <button 
+            @click="handleButtonClick" 
+            class="send-button"
+            :disabled="isFetching || !isConnected"
+          >
             {{ isFetching ? "......" : "Send" }}
           </button>
         </div>
@@ -53,6 +55,7 @@ export default {
       userInput: "",
       messages: [],
       isFetching: false,
+      isConnected: false, // 웹소켓 연결 상태
       websocket: null,
       menus: ["Research", "Rehearsal", "Production", "Feedback"], // 메뉴 항목 추가
       activeMenu: "Research", // 기본 메뉴 설정
@@ -69,9 +72,13 @@ export default {
       // this.websocket = new WebSocket("ws://unbarrier.net:4001/ws/chat"); // Deploy
       this.websocket = new WebSocket("ws://127.0.0.1:4001/ws/chat"); // Local test
 
+      this.websocket.onopen = () => {
+        console.log("WebSocket connection opened");
+        this.isConnected = true; // 연결 성공 시 입력 활성화
+      };
+
       this.websocket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-
 
         if (data.response === "[END]"){
           if (data.agentType === "reporter") {
@@ -91,17 +98,18 @@ export default {
             // msg block 새로 만듦
             this.messages.push({ sender: "Bot", text: response, agentType: agentType });
           }
-          // this.isFetching = false; // 데이터 수신 후 로딩 상태 해제
         }
       };
 
       this.websocket.onclose = () => {
         console.log("WebSocket connection closed");
+        this.isConnected = false; // 연결 종료 시 입력 비활성화
         this.isFetching = false;
       };
 
       this.websocket.onerror = (error) => {
         console.error("WebSocket error:", error);
+        this.isConnected = false; // 에러 발생 시 입력 비활성화
         this.isFetching = false;
       };
     },
