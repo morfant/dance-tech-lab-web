@@ -139,9 +139,12 @@ app = FastAPI()
 graph = get_graph()
 
 config = RunnableConfig(recursion_limit=100)
+researcher_index = 0
 
 @app.websocket("/ws/chat")
 async def websocket_chat(websocket: WebSocket):
+    global researcher_index  # 전역 변수로서 접근을 명시
+
     await websocket.accept()
 
     try:
@@ -189,17 +192,24 @@ async def websocket_chat(websocket: WebSocket):
                         print("--------------Other types--------------")
                         response_message = object_to_json_string(value)
                         research_direction_ = get_value_from_json(response_message, "research_direction")
+                        research_archive_ = get_value_from_json(response_message, "archive")
 
-                        if research_direction_ != None:
+                        if research_direction_ != None and key == 'research_director':
                             response_message = research_direction_
-                        elif has_key_in_json(response_message, 'archive'):
+                        elif research_archive_ != None and key == 'researcher':
+                            response_message = research_archive_[-1]
+                            key = key + "_" + str(researcher_index)
+                            researcher_index = researcher_index + 1
+                            researcher_index = researcher_index % 3 # researcher 의 css 스타일에 3가지 변주가 가능
+                        else:
                             response_message = None
+
                         
                     print("response_message: ", response_message)
                     print("key: ", key)
 
                     # 타이핑 효과를 위해, 실시간으로 클라이언트에게 부분적으로 응답을 전송
-                    chunk_size = 2  # 한 번에 보낼 글자의 수를 설정, 클수록 출력 빠름
+                    chunk_size = 4  # 한 번에 보낼 글자의 수를 설정, 클수록 출력 빠름
                     if response_message != None:
                         for i in range(len(partial_message), len(response_message), chunk_size):
                             partial_message += response_message[i:i+chunk_size]

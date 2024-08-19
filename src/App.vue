@@ -86,6 +86,7 @@ export default {
           }
         } else {
           const { agentType, response } = data;
+          // console.log("agentType: ", agentType)
           if (
             this.messages.length > 0 &&
             this.messages[this.messages.length - 1].sender === "Bot" &&

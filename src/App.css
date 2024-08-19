@@ -113,9 +113,19 @@ h1 {
   color: #000; /* 글자 색상 - 검은색 */
 }
 
-.message.researcher {
-  background-color: #a5b8d4; /* 연구원 메시지 색상 - 부드러운 파란색 */
-  color: #fff; /* 글자 색상 - 흰색 */
+.message.researcher_0 {
+  background-color: #4970a9; 
+  color: #fff; 
+}
+
+.message.researcher_1 {
+  background-color: #4970a9; 
+  color: #fff; 
+}
+
+.message.researcher_2 {
+  background-color: #4970a9; 
+  color: #fff; 
 }
 
 .message.reporter {
