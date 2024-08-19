@@ -10,6 +10,7 @@ from agents_ import initialPlan, Review, Research, Result
 from langchain_core.messages import AIMessage
 from langchain_core.runnables.config import RunnableConfig
 
+
 def find_instance_of(d, cls):
     """
     딕셔너리 d의 모든 값 중에서 cls 클래스의 인스턴스를 재귀적으로 찾아 반환합니다.
@@ -164,8 +165,8 @@ async def websocket_chat(websocket: WebSocket):
                     initialPlan_ = find_instance_of(value, initialPlan)
                     review_ = find_instance_of(value, Review)
                     research_ = find_instance_of(value, Research)
-                    # generation_ = find_instance_of(value, AIMessage)
-                    generation_ = find_instance_of(value, Result) 
+                    generation_ = find_instance_of(value, AIMessage)
+                    # generation_ = find_instance_of(value, Result) 
 
                     # print("****************")
                     # print(type(initialPlan_))
@@ -181,8 +182,8 @@ async def websocket_chat(websocket: WebSocket):
                         response_message = format_research_response(research_)
 
                     elif generation_ != None:
-                        # response_message = generation_.content
-                        response_message = generation_.report
+                        response_message = generation_.content
+                        # response_message = generation_.report
                         
                     else:
                         print("--------------Other types--------------")
@@ -197,13 +198,30 @@ async def websocket_chat(websocket: WebSocket):
                     print("response_message: ", response_message)
                     print("key: ", key)
 
-                    # 타이핑 효과를 위해, 실시간으로 클라이언트에게 부분적으로 응답을 전송
                     if response_message != None:
-                        for char in response_message[len(partial_message):]:
-                            partial_message += char
-                            await websocket.send_json({"response": partial_message, "agentType": key})
-                            await asyncio.sleep(0.00001)  # 타이핑 딜레이
-                    partial_message = ""
+                        await websocket.send_json({"response": response_message, "agentType": key})
+
+                    # 타이핑 효과를 위해, 실시간으로 클라이언트에게 부분적으로 응답을 전송
+                    # if response_message != None:
+                    #     # buffer_size = 100   
+                    #     # buffer = ""  # 버퍼 초기화
+                    #     for char in response_message[len(partial_message):]:
+                    #         partial_message += char
+                    #         # buffer += char
+
+                    #         # if len(buffer) >= buffer_size :
+                    #             # partial_message += buffer
+                    #             # await websocket.send_json({"response": partial_message, "agentType": key})
+
+                    #         await websocket.send_json({"response": partial_message, "agentType": key})
+                    #         # buffer = ""  # 버퍼 초기화
+
+                    #     # if buffer:
+                    #     #     partial_message += buffer
+                    #     #     await websocket.send_json({"response": partial_message, "agentType": key})
+
+                    #         # await asyncio.sleep(0.0000000000000001)  # 타이핑 딜레이
+                    # partial_message = ""
 
                     await websocket.send_json({"response": "[END]", "agentType": key})
 

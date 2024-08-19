@@ -219,9 +219,9 @@ llm_agent = ChatOpenAI(temperature=0, streaming=True, model="gpt-4o")
 structured_llm_agent = llm_agent.with_structured_output(initialPlan)
 
 system = """You are a professional assistant helping the user to find information. \n 
-            When the user asks or requests something, you start your response by saying "[매니저입니다.]"\n 
             Summarize the user's request, and ask them to confirm that you understood correctly.\n 
             If necessary, seek clarifying details.\n
+            When the user asks or requests something, you start your response by saying "[매니저입니다.]"\n 
 
             1. Context Understanding:
                 - First, analyze the user's request by extracting the key objectives, constraints, and desired outcomes.
@@ -244,7 +244,7 @@ system = """You are a professional assistant helping the user to find informatio
             5. Final Output:
                 - 'plan': A numbered list of steps to accomplish the user's request.
                 - 'research_areas': A numbered list of areas requiring further research.
-                - 'explanation': A detailed explanation of the plan and research areas.
+                - 'explanation': A detailed explanation of the plan and research areas. it starts with "[메인 agent입니다.]"
                 - Final output should be in English.
 
            """
@@ -729,12 +729,12 @@ cleaner_prompt = ChatPromptTemplate.from_messages(
 cleaner = cleaner_prompt | llm_cleaner
 
 ### for writer & analyst
-### GEMINI
-# llm_reporter_gemini = ChatGoogleGenerativeAI(model="gemini-1.5-pro",
-#       google_api_key="AIzaSyDe-IPl8xW7u1AZ8xTbsc9Qw04azIRO6mM",
-#       convert_system_message_to_human = True,
-#       verbose = True,
-# )
+## GEMINI
+llm_reporter_gemini = ChatGoogleGenerativeAI(model="gemini-1.5-pro",
+      google_api_key="AIzaSyDe-IPl8xW7u1AZ8xTbsc9Qw04azIRO6mM",
+      convert_system_message_to_human = True,
+      verbose = False,
+)
 
 # structured_llm_reporter_gemini = llm_reporter_gemini.with_structured_output(Result)
 
@@ -743,8 +743,8 @@ cleaner = cleaner_prompt | llm_cleaner
 
 ### OPENAI
 # llm_reporter = ChatOpenAI(model="gpt-4o-2024-08-06", temperature=0)
-llm_reporter = ChatOpenAI(model="gpt-4o-mini", temperature=0)
-structured_llm_reporter = llm_reporter.with_structured_output(Result)
+# llm_reporter = ChatOpenAI(model="gpt-4o-mini", temperature=0) #MINI
+# structured_llm_reporter = llm_reporter.with_structured_output(Result)
 
 system_01 = """You are an experienced analyst on various areas such as art, science and other fields.\n 
             Your sole purpose is to write well written, critically acclaimed objective and structured reports on the given archive.
@@ -797,11 +797,11 @@ reporter_prompt = ChatPromptTemplate.from_messages(
 
 ### GPT-4O
 # reporter = reporter_prompt | llm_reporter
-structured_llm_reporter = reporter_prompt | structured_llm_reporter
+# reporter = reporter_prompt | structured_llm_reporter
 
 ### GEMINI 1.5PRO
-# reporter = reporter_prompt | llm_reporter_gemini
-# structured_llm_reporter_gemini = reporter_prompt | structured_llm_reporter_gemini
+reporter = reporter_prompt | llm_reporter_gemini
+# reporter = reporter_prompt | structured_llm_reporter_gemini
 
 ### for publisher - NOT USING AT THE MOMENT
 llm_analysis = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0)
@@ -1025,7 +1025,7 @@ def retrieve(state):
         # # return {"documents": documents, "question": research}
         retrieve_count = retrieve_count + 1
 
-        if retrieve_count > 2:
+        if retrieve_count > 1:
         # if retrieve_count > len(research) - 1:
             retrieve_stop = "Yes"
         
@@ -1112,9 +1112,10 @@ def report(state):
     archive = state["archive"]
     question = state["question"]
 
-    # generation = structured_llm_reporter_gemini.invoke({"plan":plan, "archive": archive, "question":question}) #GEMINI
-    generation = structured_llm_reporter.invoke({"plan":plan, "archive": archive, "question":question}) #OPENAI
-    wrapped_generation = textwrap.fill(generation.report, width=120)
+    
+    generation = reporter.invoke({"plan":plan, "archive": archive, "question":question}) 
+    wrapped_generation = textwrap.fill(generation.content, width=120) 
+    # wrapped_generation = textwrap.fill(generation.report, width=120) #for structured output
     print('\n' + ">> REPORT: {}".format(wrapped_generation))
     
     return {"generation": generation}
