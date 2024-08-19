@@ -98,6 +98,7 @@ export default {
             // msg block 새로 만듦
             this.messages.push({ sender: "Bot", text: response, agentType: agentType });
           }
+          this.updateScroll(); // 메시지가 추가될 때마다 스크롤
         }
       };
 
@@ -124,12 +125,17 @@ export default {
       this.isFetching = true; // 메시지 전송 시 로딩 상태 설정
       this.websocket.send(JSON.stringify({ message: this.userInput }));
       this.userInput = "";
+      this.updateScroll(); // 메시지 전송 후 스크롤
     },
     setActiveMenu(menu) {
       this.activeMenu = menu; // 선택된 메뉴 항목 설정
     },
     renderMessage(text) {
       return marked.parse(text);
+    },
+    updateScroll() {
+      // 브라우저 창 전체를 스크롤하여 페이지의 맨 아래로 이동
+      window.scrollTo(0, document.body.scrollHeight);
     },
   },
   mounted() {
