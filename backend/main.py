@@ -132,8 +132,6 @@ def format_research_response(research_instance: Research) -> str:
     )
     return response
 
-
-
 app = FastAPI()
 # 정적 파일 경로를 '/static'으로 설정하고, 파일들이 저장된 디렉토리를 지정
 # app.mount("/static", StaticFiles(directory="static"), name="static")
