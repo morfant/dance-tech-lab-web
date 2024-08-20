@@ -94,7 +94,10 @@ urls = [
    
     "https://www.orartswatch.org/ai-wants-your-art-do-you-have-a-say/",
     "https://stedelijkstudies.com/journal/the-troubles-with-temporality/",
-    "https://khio.no/en/staff/bojana-cvejic",   
+    "https://khio.no/en/staff/bojana-cvejic",  
+    "https://www.pinabausch.org/post/what-moves-me",
+    "https://www.dancehousediary.com.au/?p=4041", 
+    "https://www.performancephilosophy.org/journal/article/view/29/60",
 ]
 
 docs = [WebBaseLoader(url).load() for url in urls]
@@ -103,7 +106,7 @@ docs_list = [item for sublist in docs for item in sublist]
 # print(docs_list)
 
 text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-    chunk_size=500, chunk_overlap=50
+    chunk_size=800, chunk_overlap=400
 )
 doc_splits = text_splitter.split_documents(docs_list)
 
@@ -1025,8 +1028,8 @@ def retrieve(state):
         # # return {"documents": documents, "question": research}
         retrieve_count = retrieve_count + 1
 
-        if retrieve_count > 1:
-        # if retrieve_count > len(research) - 1:
+        # if retrieve_count > 4:
+        if retrieve_count > len(research) - 1:
             retrieve_stop = "Yes"
         
     return {"documents": documents_content, "archive":archive, "retrieve_stop": retrieve_stop, "retrieve_count": retrieve_count, "retrieve_query": research[retrieve_count - 1]}
@@ -1174,7 +1177,7 @@ def web_search(state):
     # web_results = tavily_search_tool.search(retrieve_query, search_depth="advanced", include_raw_content=True, max_results=3)["results"]
 
     try:
-        web_results = tavily_search_tool.search(retrieve_query, search_depth="advanced", include_raw_content=True, max_results=1)["results"]
+        web_results = tavily_search_tool.search(retrieve_query, search_depth="advanced", include_raw_content=True, max_results=5)["results"]
     except HTTPError as e:
         print(f"An HTTP error occurred: {e}")
         web_results = []
