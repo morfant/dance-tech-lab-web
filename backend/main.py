@@ -131,8 +131,6 @@ def format_research_response(research_instance: Research) -> str:
     )
     return response
 
-
-
 app = FastAPI()
 
 # 컴파일된 그래프 가져오기
