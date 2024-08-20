@@ -20,9 +20,12 @@
           <div
             v-for="(message, index) in messages"
             :key="index"
-            :class="['message', message.agentType]"
-            v-html="renderMessage(message.text)"
-          ></div>
+            :class="['message', message.agentType]" >
+            <div v-html="renderMessage(message.text)"></div>
+            <button v-if="isReportEnd" @click="downloadPDF(index)" class="pdf-button">
+              Download PDF
+            </button>
+          </div>
           <div v-if="isFetching" class="loading-indicator">응답을 받아오는 중입니다...</div>
         </div>
         <div class="input-container">
@@ -40,6 +43,7 @@
           >
             {{ isFetching ? "......" : "Send" }}
           </button>
+          
         </div>
       </div>
     </div>
@@ -48,6 +52,7 @@
 
 <script>
 import { marked } from "marked";
+import html2pdf from 'html2pdf.js';
 
 export default {
   data() {
@@ -55,6 +60,7 @@ export default {
       userInput: "",
       messages: [],
       isFetching: false,
+      isReportEnd: false,
       isConnected: false, // 웹소켓 연결 상태
       websocket: null,
       menus: ["Research", "Rehearsal", "Production", "Feedback"], // 메뉴 항목 추가
@@ -83,6 +89,7 @@ export default {
         if (data.response === "[END]"){
           if (data.agentType === "reporter") {
             this.isFetching = false;
+            this.isReportEnd = true;
           }
         } else {
           const { agentType, response } = data;
@@ -124,6 +131,7 @@ export default {
         agentType: "User",
       });
       this.isFetching = true; // 메시지 전송 시 로딩 상태 설정
+      this.isReportEnd = false;
       this.websocket.send(JSON.stringify({ message: this.userInput }));
       this.userInput = "";
       this.updateScroll(); // 메시지 전송 후 스크롤
@@ -138,6 +146,50 @@ export default {
       // 브라우저 창 전체를 스크롤하여 페이지의 맨 아래로 이동
       window.scrollTo(0, document.body.scrollHeight);
     },
+    downloadPDF(index) {
+      const message = this.messages[index];
+
+      // Markdown 형식의 텍스트를 HTML로 변환
+      const htmlContent = marked.parse(message.text);
+      
+      // 스타일을 적용하기 위한 HTML 구조 생성
+      const content = `
+        <div id="pdf-content" style="
+          font-family: Arial, sans-serif;
+          padding: 20px;
+          color: #333;
+          line-height: 1.5;
+        ">
+          ${htmlContent}
+        </div>
+      `;
+      
+      // 임시로 HTML 콘텐츠를 문서에 추가
+      const div = document.createElement("div");
+      div.innerHTML = content;
+      document.body.appendChild(div);
+
+      // // CSS 파일을 동적으로 로드
+      // const link = document.createElement('link');
+      // link.rel = 'stylesheet';
+      // link.href = '/static/pdf_styles.css'; // CSS 파일 경로
+      // document.head.appendChild(link);
+
+      // html2pdf.js를 사용하여 PDF로 변환
+      const element = document.getElementById('pdf-content');
+      const options = {
+        margin: [5, 10], // top/bottom, left/right
+        filename: `message-${index + 1}.pdf`,
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      html2pdf().from(element).set(options).save().then(() => {
+        // PDF 저장 후, 임시로 추가한 HTML 콘텐츠를 제거
+        document.body.removeChild(div);
+        // document.head.removeChild(link);
+      });
+    }
   },
   mounted() {
     this.connectWebSocket();

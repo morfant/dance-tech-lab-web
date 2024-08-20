@@ -201,3 +201,17 @@ h1 {
   font-style: italic;
   animation: smooth-blink 3.0s ease-in-out infinite; /* 애니메이션 적용 */
 }
+
+.pdf-button {
+  margin-left: 10px;
+  padding: 5px 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.pdf-button:hover {
+  background-color: #45a049;
+}
