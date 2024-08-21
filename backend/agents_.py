@@ -19,6 +19,7 @@ os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
 _set_env("LANGCHAIN_API_KEY")
 
 from langchain_community.document_loaders import WebBaseLoader
+from langchain.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_openai import OpenAIEmbeddings
@@ -69,6 +70,8 @@ from langgraph.prebuilt import ToolNode
 from langchain_core.runnables.config import RunnableConfig
 
 
+print(">> WEB LOADER")
+
 urls = [
     "http://choomin.sfac.or.kr/zoom/zoom_view.asp?zom_idx=840&div=01&type=VW",
     "http://choomin.sfac.or.kr/zoom/zoom_view.asp?type=VW&div=&zom_idx=822&page=2&field=&keyword=",
@@ -100,15 +103,38 @@ urls = [
     "https://www.performancephilosophy.org/journal/article/view/29/60",
 ]
 
+# LOAD WEB PAGES
 docs = [WebBaseLoader(url).load() for url in urls]
 docs_list = [item for sublist in docs for item in sublist]
-
 # print(docs_list)
 
+# LOAD PDF
+print(">> PDF LOADER")    
+PATH = "./data/"
+
+pdf_files = [
+    PATH + "확장된 안무의 장에서 수행적 드라마투르기.pdf",
+    PATH + "Score.pdf",
+    PATH + "스코어스코어_드라마투르그의 스코어.pdf",
+    PATH + "the choreographic documentary glory.pdf",
+    PATH + "NTTF_D.Hay.pdf",
+]
+
+pdf_docs = []
+for pdf_file in pdf_files:
+    loader = PyPDFLoader(pdf_file)
+    pdf_docs.extend(loader.load())
+
+#COMBINE WEB + PDF
+all_docs = pdf_docs + docs_list    
+
+#SPLITTER
 text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
     chunk_size=800, chunk_overlap=400
 )
-doc_splits = text_splitter.split_documents(docs_list)
+
+doc_splits = text_splitter.split_documents(all_docs) #WEB + PDF
+# doc_splits = text_splitter.split_documents(docs_list)
 
 # print('\n' + ">> splits size: {}".format(len(doc_splits)))
 # print(doc_splits[8])
@@ -119,7 +145,8 @@ vectorstore = Chroma.from_documents(
     collection_name="rag-chroma",
     embedding=OpenAIEmbeddings(),
 )
-retriever = vectorstore.as_retriever(search_kwargs={"k": 6})
+retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
+print(">> VECTOR STORED")
 
 
 class GradeDocuments(BaseModel):
@@ -200,7 +227,7 @@ tavily_search_tool = TavilyClient(api_key="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
 
 ### variables
 max_retries = 3
-
+vectorData_use = 0
 
 
 #WEB SCRAPING
@@ -259,7 +286,6 @@ system = """You are a professional assistant helping the user to find informatio
 #             "plan": [List of steps to achieve the user's goal],
 #             "research_areas": [List of areas that require further research]
 #             }\n """
-
 
 prompt = ChatPromptTemplate.from_messages(
     [
@@ -412,7 +438,8 @@ system_00 = """You are an experienced research director specialized in improving
                     
                     - 7.Potential Information Sources:
                         Direct the Research Agent to identify and recommend specific sources that will be useful for the research. Ensure that they include a variety of credible resources (e.g., books, articles, databases) and explain why each source is valuable.
-                    
+                        Guide the Research Agent to provide the context of recommended sources. 
+
                     Use this structure to create a clear and organized set of instructions for the Research Agent. Ensure that each section is detailed enough to guide them through the research process effectively.
 
                 - For instructions for **each** research topic:
@@ -982,6 +1009,12 @@ def retrieve(state):
         retrieve_stop = "No"
         retrieve_count = 0
 
+    if retrieve_stop == "No" and retrieve_count > 3:
+        # if retrieve_count > len(research) - 1:
+        retrieve_stop = "Yes"
+        documents_content = []
+        print('\n' + ">> THE RESEARCH PROCESS IS DONE!")    
+
     # for r in research:
     #     print(r)
     if retrieve_stop == "No":
@@ -1029,8 +1062,8 @@ def retrieve(state):
         retrieve_count = retrieve_count + 1
 
         # if retrieve_count > 4:
-        if retrieve_count > len(research) - 1:
-            retrieve_stop = "Yes"
+        # if retrieve_count > len(research) - 1:
+        #     retrieve_stop = "Yes"
         
     return {"documents": documents_content, "archive":archive, "retrieve_stop": retrieve_stop, "retrieve_count": retrieve_count, "retrieve_query": research[retrieve_count - 1]}
 
@@ -1045,7 +1078,7 @@ def grade_documents(state):
     Returns:
         state (dict): Updates documents key with only filtered relevant documents
     """
-
+    global vectorData_use  # Declare vectorData_use as global to modify it
     print('\n' + ">> GRADER  - CHECK DOCUMENT RELEVANCE TO QUESTION")
     question = state["question"]
     retrieve_query = state["retrieve_query"]
@@ -1089,6 +1122,9 @@ def grade_documents(state):
             filtered_docs.append(d)
             # filtered_docs.append(d.page_content)
             print(filtered_docs)
+            web_search = "Yes"
+            vectorData_use += 1
+            print(">> VECTOR: {}".format(vectorData_use))
         else:
             print(">> GRADE: BAD 관련없는 문서!" + '\n')
             web_search = "Yes"
@@ -1098,11 +1134,13 @@ def grade_documents(state):
         archive = []
         print('\n' + ">> archive = []")
         if filtered_docs != []:        
-            archive.append(filtered_docs)
+            filtered_docs_ = ' '.join(filtered_docs)
+            archive.append(filtered_docs_)
             print('\n' + ">> archive START")
     else:  
-        if filtered_docs != []:        
-            archive.append(filtered_docs)
+        if filtered_docs != []:   
+            filtered_docs_ = ' '.join(filtered_docs)     
+            archive.append(filtered_docs_)
             print('\n' + ">> ADDED TO archive | LENGTH: {}".format(len(archive)))    
 
     return {"archive": archive, "question": question, "web_search": web_search}
@@ -1115,7 +1153,8 @@ def report(state):
     archive = state["archive"]
     question = state["question"]
 
-    
+    print(">> ARCHIVE LENGTH: {} | VECTOR: {}".format(len(archive), vectorData_use))
+
     generation = reporter.invoke({"plan":plan, "archive": archive, "question":question}) 
     wrapped_generation = textwrap.fill(generation.content, width=120) 
     # wrapped_generation = textwrap.fill(generation.report, width=120) #for structured output
@@ -1177,7 +1216,7 @@ def web_search(state):
     # web_results = tavily_search_tool.search(retrieve_query, search_depth="advanced", include_raw_content=True, max_results=3)["results"]
 
     try:
-        web_results = tavily_search_tool.search(retrieve_query, search_depth="advanced", include_raw_content=True, max_results=5)["results"]
+        web_results = tavily_search_tool.search(retrieve_query, search_depth="advanced", include_raw_content=True, max_results=4)["results"]
     except HTTPError as e:
         print(f"An HTTP error occurred: {e}")
         web_results = []
@@ -1313,7 +1352,7 @@ def decide_to_archive(state):
         return "transform_query"
     else:
         # We have relevant documents, so generate answer
-        print(">> DECISION: OK - archived")
+        print(">> DECISION: OK - ARCHIVED")
         return "researcher"
     
 
