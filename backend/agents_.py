@@ -215,7 +215,7 @@ class GraphState(TypedDict):
 
 
 ### TAVILY API
-tavily_search_tool = TavilyClient(api_key="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")
+tavily_search_tool = TavilyClient(api_key=os.getenv("ENV_TAVILY_API_KEY"))
 
 # content = client.search("What happened in the latest burning man floods?", search_depth="advanced")["results"]
 # response = tavily_search_tool.search(query, search_depth="advanced", include_raw_content=True, max_results=5)["results"]
@@ -761,7 +761,7 @@ cleaner = cleaner_prompt | llm_cleaner
 ### for writer & analyst
 ## GEMINI
 llm_reporter_gemini = ChatGoogleGenerativeAI(model="gemini-1.5-pro",
-      google_api_key="AIzaSyDe-IPl8xW7u1AZ8xTbsc9Qw04azIRO6mM",
+      google_api_key=os.getenv("ENV_GOOGLE_GEMINI_API_KEY"),
       convert_system_message_to_human = True,
       verbose = False,
 )
