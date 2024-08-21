@@ -226,7 +226,7 @@ tavily_search_tool = TavilyClient(api_key=os.getenv("ENV_TAVILY_API_KEY"))
 # results_02 = web_search_tool.invoke({"query": query})
 
 ### variables
-max_retries = 3
+max_retries = 5
 vectorData_use = 0
 
 
@@ -401,10 +401,11 @@ structured_llm_research_director = llm_research_director.with_structured_output(
 system_00 = """You are an experienced research director specialized in improving and optimizing research areas for academic inquiry and effective web search, as well as in designing clear and logical research directions that guide researchers efficiently to efficiently gather relevant information, analyze data, and achieve meaningful results.   
             when the user ask something you start by saying "[리서치 디렉터 agent입니다.]",and summarize the request you've received.
             
-            1.You analyze the critique: {plan}, and then revise the provided research topics: {research}, based on your analysis. Ensure the revised research topics are highly optimized for search engines, clear, specific, and aligned with the research goals.
+            1.You analyze the critique: {plan} thoroughly, and then modify the provided research topics: {research} based on your analysis for better version that is highly optimized for search engine. Your goal is to create clearer, more specific research topics that align with the user's original request and research objectives. 
+                                                                                                                                                                                                                                             
                 - Extract the key objectives, constraints, and outcomes from the provided plan {plan}.
-                - Revise each research area by incorporating relevant keywords and phrases, replacing vague language with specific terms, and aligning them with the overall goals.
-                - Ensure that each research item is precisely aligned with the overall research goals, emphasizing clarity, specificity, and relevance.
+                - Modify each research topic by incorporating relevant keywords and phrases, replacing vague language with specific terms, and aligning them with the overall goals.
+                - Ensure that each research topic is precisely aligned with the overall research goals, emphasizing clarity, specificity, and relevance.
                 - **Optimize each research area for web search** by incorporating relevant keywords, phrases, and search-friendly structures. This will facilitate more effective information retrieval during the research process.
                     - Replace any vague language or demonstrative pronouns with explicit proper nouns and detailed, descriptive terms. This ensures that each research area is clear, specific, and unambiguous.
                 - Present the revised list clearly under the key 'research_area'.
@@ -448,7 +449,7 @@ system_00 = """You are an experienced research director specialized in improving
                         - Number all sections and subsections to provide a clear and organized structure.  
 
                 - After completing the instruction on each topic, **automatically proceed** to the next topic in the list.\n
-                - Present these instructions in a numbered format under the key 'research_direction'.
+                - Present these instructions in a numbered format under the key 'research_direction'. it starts with "[리서치 디렉터 agent입니다.]
                 - Final output should be in KOREAN.    
                 """
 
@@ -639,15 +640,15 @@ system_01 ="""You are an experienced researcher specialized in finding userful i
             - Identify the content related to the research topic {research} within the input {research_direction}. Based on the identified content, determine the research instructions corresponding to the research topic. Then, identify the specific objectives and areas to conduct detailed research based on the research instructions.
 
         2.Search for Relevant Information:
-            - Follow the instructions to conduct a thorough and structured research on the assigned topic. Adhere to the guidelines for each section to ensure all aspects of the research are covered comprehensively.
+            - MUST Follow the instructions to conduct a thorough and structured research on the assigned topic. Adhere to the guidelines for each section to ensure all aspects of the research are covered comprehensively.
             - Must avoid simply restating or elaborating on the instructions. Instead, focus on gathering new, relevant information that adds value to the research.
             - Actively find useful information from credible sources such as academic journals, books, interviews, article, news, and case studies that are directly related to {research} by using Tavily web_serach_tool.
             - Extract and present relevant data, quotes, and examples. Ensure that the information directly supports the objectives outlined in the instructions.
             
         3.Additional Tasks:
-            - Find 5 academic sources (e.g., journals, articles) that provide insights into the intersection of technology and human perception. if possible, present the context of them.
-            - Find and summarize 5 interviews related to the topics that offer additional perspectives. if possible, provide the link.
-            - Incorporate at least 5 reviews or critiques about the topic to understand its reception and contributions. if possible, provide the link
+            - Find 5 academic sources (e.g., journals, articles) that provide insights into the intersection of technology and human perception, and present the context of them.
+            - Find and summarize 5 interviews related to the topics that offer additional perspectives, and present the context of them.
+            - Incorporate at least 5 reviews or critiques about the topic to understand its reception and contributions, and present the context of them.
             - Extract and present key quotes, passages, and case studies that directly relate to the topic.
             - All results from additional tasks under the key 'additional information'.
 
@@ -782,22 +783,23 @@ system_01 = """You are an experienced analyst on various areas such as art, scie
             You are verbose and logical.\n 
             when the user ask something you start by saying "[분석 agent입니다.]",and summarize the request you've received.
 
-            you analyze {archive} that you are given and answer the following user's question: {question} in a detaied, well-structured, comprehensive anlaysis of minimum 5000 words that offers in-depth insights into various aspects of the archive. 
-                - Develop a series of thoughtful and detailed questions related to the subject, then carefully answer each question. Use this process of self-reflection to deepen your understanding and arrive at a more accurate and well-rounded conclusion.
+            you analyze {archive} that you are given and answer the following user's question: {question} in a detaied, well-structured, comprehensive anlaysis of minimum 5000 words that offers in-depth insights into various aspects of the archive {archive}. 
+                - Analyze the provided archive and categorize it according to the context.
+                - Summarize it and develop a series of thoughtful and detailed questions related to the each category, then carefully answer each question. Use this process of self-reflection to deepen your understanding and arrive at a more accurate and well-rounded conclusion.
+                - Do not oversimplify. Keep essential details intact when you summarize.
                 - You make a comprehensive judgement based on all the answer to formulate the conclusion.
-                - Do not oversimplify. Keep essential details intact.
-                - Structure your report in numbered sections,reflecting your expertise in art, science, and other relevant areas with appropriate use of headings and bullet points for easy navigation and readability.
                 - You explain the logical basis on which you reached that conclusion in a numbered format.
+                
+                - Structure your report in numbered sections,reflecting your expertise in art, science, and other relevant areas with appropriate use of headings and bullet points for easy navigation and readability.
                 - You MUST present key quotes, passages, and case studies that directly relate to the topic.
                 - you provide potential information to look at. if possible, provide the link.
                 - you provide at least 10 questions that come to mind about the topic: List any questions that naturally arise from the topic, which could guide further exploration or clarify the research objectives.
                 - you provide detailed references in MLA format and markdown syntax.
 
             present your analysis under the key 'result'   
-            
             Final output should be in KOREAN.  
 
-            Take a deep breath and take it step by step to provide an insightful response
+            Take a deep breath and take it step by step to provide an insightful response.
             """ 
 
 system_02 = """ You are an experienced analyst on various areas such as art, science and other fields.\n 
@@ -1157,11 +1159,23 @@ def report(state):
 
     print(">> ARCHIVE LENGTH: {} | VECTOR: {}".format(len(archive), vectorData_use))
 
-    generation = reporter.invoke({"plan":plan, "archive": archive, "question":question}) 
-    wrapped_generation = textwrap.fill(generation.content, width=120) 
-    # wrapped_generation = textwrap.fill(generation.report, width=120) #for structured output
-    print('\n' + ">> REPORT: {}".format(wrapped_generation))
-    
+    success = False
+
+    while not success and retry_count < max_retries:
+        try:
+            generation = reporter.invoke({"plan":plan, "archive": archive, "question":question}) 
+            wrapped_generation = textwrap.fill(generation.content, width=120) 
+            # wrapped_generation = textwrap.fill(generation.report, width=120) #for structured output
+            print('\n' + ">> REPORT: {}".format(wrapped_generation))
+            success = True  # 요청 성공 시 while 루프 탈출
+
+        except Exception as e:
+                print(f"Error occurred: {e}. Retrying... ({retry_count + 1}/{max_retries})")
+                retry_count += 1
+
+    if not success:
+        print(">> 요청 실패: 최대 재시도 횟수를 초과했습니다.")    
+   
     return {"generation": generation}
 
 
