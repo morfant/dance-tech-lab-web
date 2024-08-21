@@ -275,7 +275,7 @@ system = """You are a professional assistant helping the user to find informatio
                 - 'plan': A numbered list of steps to accomplish the user's request.
                 - 'research_areas': A numbered list of areas requiring further research.
                 - 'explanation': A detailed explanation of the plan and research areas. it starts with "[메인 agent입니다.]"
-                - Final output should be in English.
+                - Final output should be in KOREAN.
 
            """
 
@@ -332,7 +332,7 @@ system ="""you are a professional critic with a lot of experiences who critique 
                     - 'review_note': A detailed analysis of the provided content, with actionable suggestions for improvement.
                     - 'plan': A revised, step-by-step plan incorporating the suggested improvements.
                     - 'research_areas': A numbered list of areas requiring further research, with explanations for each.
-                - Final output should be in English.    
+                - Final output should be in KOREAN.    
 
             """
             # 6. Feedback and Iteration**:
@@ -449,7 +449,7 @@ system_00 = """You are an experienced research director specialized in improving
 
                 - After completing the instruction on each topic, **automatically proceed** to the next topic in the list.\n
                 - Present these instructions in a numbered format under the key 'research_direction'.
-                - Final output should be in English.    
+                - Final output should be in KOREAN.    
                 """
 
                 # - Present guidance and instruction on each research topic in a well-structured report of at least 1000 words, ensuring that the instruction follows a directive format to guide the research process under the key 'research_direction.'
@@ -633,7 +633,7 @@ llm_researcher = ChatOpenAI(temperature=0, streaming=True, model="gpt-4o-2024-08
 system_01 ="""You are an experienced researcher specialized in finding userful information. 
         when the user ask something you start by saying "[리서치 agent입니다.]".
 
-        The output shoud be in English.
+        The output shoud be in KOREAN.
 
         1.Research instruction and Topic:
             - Identify the content related to the research topic {research} within the input {research_direction}. Based on the identified content, determine the research instructions corresponding to the research topic. Then, identify the specific objectives and areas to conduct detailed research based on the research instructions.
@@ -788,14 +788,16 @@ system_01 = """You are an experienced analyst on various areas such as art, scie
                 - Do not oversimplify. Keep essential details intact.
                 - Structure your report in numbered sections,reflecting your expertise in art, science, and other relevant areas with appropriate use of headings and bullet points for easy navigation and readability.
                 - You explain the logical basis on which you reached that conclusion in a numbered format.
-                - You present key quotes, passages, and case studies that directly relate to the topic.
+                - You MUST present key quotes, passages, and case studies that directly relate to the topic.
                 - you provide potential information to look at. if possible, provide the link.
                 - you provide at least 10 questions that come to mind about the topic: List any questions that naturally arise from the topic, which could guide further exploration or clarify the research objectives.
                 - you provide detailed references in MLA format and markdown syntax.
 
-            present your analysis under the key 'result'       
+            present your analysis under the key 'result'   
             
-            Final output should be in English.  
+            Final output should be in KOREAN.  
+
+            Take a deep breath and take it step by step to provide an insightful response
             """ 
 
 system_02 = """ You are an experienced analyst on various areas such as art, science and other fields.\n 

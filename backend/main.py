@@ -210,7 +210,7 @@ async def websocket_chat(websocket: WebSocket):
                     print("key: ", key)
 
                     # 타이핑 효과를 위해, 실시간으로 클라이언트에게 부분적으로 응답을 전송
-                    chunk_size = 4  # 한 번에 보낼 글자의 수를 설정, 클수록 출력 빠름
+                    chunk_size = 30  # 한 번에 보낼 글자의 수를 설정, 클수록 출력 빠름
                     if response_message != None:
                         for i in range(len(partial_message), len(response_message), chunk_size):
                             partial_message += response_message[i:i+chunk_size]
