@@ -49,7 +49,7 @@ pm2 restart all // pm2가 관리하는 모든 프로세스 재시작
 
 pm2 delete <name> // 특정 프로세스 삭제(정지)
 
-pm2 start yarn serve —name dance-tech-lab-web // web server 실행
+pm2 start yarn --name "front" -- serve // web server 실행
 
 // backend 폴더로 이동한 후에
 Pm2 start ecosystem.config.js // backend 실행
