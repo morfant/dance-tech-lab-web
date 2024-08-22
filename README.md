@@ -37,3 +37,20 @@ pip install -r requirements.txt
 ```
 uvicorn main:app --reload
 ```
+
+
+## pm2를 이용한 프로세스 관리
+```
+pm2 list // pm2를 통해 실행중인 프로세스 확인
+
+pm2 logs <name> // name에 해당하는 프로세스의 로그 확인
+
+pm2 restart all // pm2가 관리하는 모든 프로세스 재시작
+
+pm2 delete <name> // 특정 프로세스 삭제(정지)
+
+pm2 start yarn serve —name dance-tech-lab-web // web server 실행
+
+// backend 폴더로 이동한 후에
+Pm2 start ecosystem.config.js // backend 실행
+```
