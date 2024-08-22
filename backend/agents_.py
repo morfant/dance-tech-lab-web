@@ -1160,6 +1160,7 @@ def report(state):
     print(">> ARCHIVE LENGTH: {} | VECTOR: {}".format(len(archive), vectorData_use))
 
     success = False
+    retry_count = 0
 
     while not success and retry_count < max_retries:
         try:
