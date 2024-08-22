@@ -43,7 +43,7 @@ uvicorn main:app --reload
 ```
 pm2 list // pm2를 통해 실행중인 프로세스 확인
 
-pm2 logs <name> // name에 해당하는 프로세스의 로그 확인
+pm2 logs <name> // name에 해당하는 프로세스의 로그 확인 (name은 pm2 list를 통해 확인 가능)
 
 pm2 restart all // pm2가 관리하는 모든 프로세스 재시작
 
