@@ -10,13 +10,13 @@ def _set_env(key: str):
     if key not in os.environ:
         os.environ[key] = getpass.getpass(f"{key}:")
 
-_set_env("OPENAI_API_KEY") #OPENAI
-_set_env("TAVILY_API_KEY") #TAVILY
+# _set_env("OPENAI_API_KEY") #OPENAI
+# _set_env("TAVILY_API_KEY") #TAVILY
 
 #LANGCHAIN - use LangSmith for tracing
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
 os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
-_set_env("LANGCHAIN_API_KEY")
+# _set_env("LANGCHAIN_API_KEY")
 
 from langchain_community.document_loaders import WebBaseLoader
 from langchain.document_loaders import PyPDFLoader
@@ -113,9 +113,9 @@ print(">> PDF LOADER")
 PATH = "./data/"
 
 pdf_files = [
-    PATH + "확장된 안무의 장에서 수행적 드라마투르기.pdf",
+    PATH + "Performative_dramaturgy_in_the_expanded_field_of_choreography.pdf",
     PATH + "Score.pdf",
-    PATH + "스코어스코어_드라마투르그의 스코어.pdf",
+    PATH + "score_of_dramaturgy.pdf",
     PATH + "the choreographic documentary glory.pdf",
     PATH + "NTTF_D.Hay.pdf",
 ]
