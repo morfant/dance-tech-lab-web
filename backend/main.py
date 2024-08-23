@@ -151,6 +151,13 @@ async def websocket_chat(websocket: WebSocket):
     try:
         while True:
             data = await websocket.receive_json()
+
+            
+            # "heartbeat" 메시지인지 확인
+            if data.get("heartbeat") == "ping":
+                # await websocket.send_json({"response": "pong", "agentType": "heartbeat"})
+                continue  # "heartbeat" 메시지일 경우, 아래의 로직을 건너뜁니다.
+
             user_input = data.get("message", "")
             # print("user_input: ", user_input)
 

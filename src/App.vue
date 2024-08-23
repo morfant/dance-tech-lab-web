@@ -75,12 +75,20 @@ export default {
     },
     connectWebSocket() {
       console.log("connectWebSocket()");
-      this.websocket = new WebSocket("ws://unbarrier.net:4001/ws/chat"); // Deploy
-      // this.websocket = new WebSocket("ws://127.0.0.1:4001/ws/chat"); // Local test
+      // this.websocket = new WebSocket("ws://unbarrier.net:4001/ws/chat"); // Deploy
+      this.websocket = new WebSocket("ws://127.0.0.1:4001/ws/chat"); // Local test
 
       this.websocket.onopen = () => {
         console.log("WebSocket connection opened");
         this.isConnected = true; // 연결 성공 시 입력 활성화
+
+        // 30초마다 ping 메시지 전송
+        this.pingInterval = setInterval(() => {
+                if (this.websocket.readyState === WebSocket.OPEN) {
+                    this.websocket.send(JSON.stringify({ heartbeat : "ping" }));
+                    console.log("ping");
+                }
+            }, 30000); // 30초
       };
 
       this.websocket.onmessage = (event) => {
@@ -114,12 +122,16 @@ export default {
         console.log("WebSocket connection closed");
         this.isConnected = false; // 연결 종료 시 입력 비활성화
         this.isFetching = false;
+        // ping 메시지 전송 중지
+        clearInterval(this.pingInterval);
       };
 
       this.websocket.onerror = (error) => {
         console.error("WebSocket error:", error);
         this.isConnected = false; // 에러 발생 시 입력 비활성화
         this.isFetching = false;
+        // ping 메시지 전송 중지
+        clearInterval(this.pingInterval);
       };
     },
     sendMessage() {
