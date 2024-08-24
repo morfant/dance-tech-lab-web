@@ -75,7 +75,7 @@ export default {
     },
     connectWebSocket() {
       console.log("connectWebSocket()");
-      // this.websocket = new WebSocket("ws://unbarrier.net:4001/ws/chat"); // Deploy
+      //this.websocket = new WebSocket("ws://unbarrier.net:4001/ws/chat"); // Deploy
       this.websocket = new WebSocket("ws://127.0.0.1:4001/ws/chat"); // Local test
 
       this.websocket.onopen = () => {
@@ -114,7 +114,7 @@ export default {
             // msg block 새로 만듦
             this.messages.push({ sender: "Bot", text: response, agentType: agentType });
           }
-          // this.updateScroll(); // 메시지가 추가될 때마다 스크롤
+          this.updateScroll(); // 메시지가 추가될 때마다 스크롤
         }
       };
 
@@ -146,7 +146,7 @@ export default {
       this.isReportEnd = false;
       this.websocket.send(JSON.stringify({ message: this.userInput }));
       this.userInput = "";
-      // this.updateScroll(); // 메시지 전송 후 스크롤
+      this.updateScroll(); // 메시지 전송 후 스크롤
     },
     setActiveMenu(menu) {
       this.activeMenu = menu; // 선택된 메뉴 항목 설정

@@ -87,6 +87,7 @@ h1 {
   border-radius: 4px;
   width: 100%; /* 메시지가 채팅 박스의 전체 너비를 사용하도록 설정 */
   box-sizing: border-box; /* 패딩과 테두리까지 포함하여 width를 설정 */
+  font-size:22px;
 }
 
 .message.Bot {

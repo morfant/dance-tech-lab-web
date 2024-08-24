@@ -323,7 +323,7 @@ system ="""you are a professional critic with a lot of experiences who critique 
                 - Keep the plan concise, aiming for 300-500 words to maintain focus and clarity, while providing enough detail for implementation.
 
             4. Research Areas:
-                - Based on your critique, analyze the given research area and Identify and update at least 10 distinct areas that require further research to successfully implement the revised plan.
+                - Based on your critique, analyze the given research area and Identify and update at least 8 distinct areas that require further research to successfully implement the revised plan.
                 - Ensure that each area is specific, actionable, and directly tied to the improvements suggested in the critique.
                 - Provide a brief explanation for each area, highlighting why it is crucial for the success of the plan.
                 - Avoid the use of demonstrative pronouns; instead, use explicit proper nouns for clarity and precision.
