@@ -118,6 +118,8 @@ pdf_files = [
     PATH + "score_of_dramaturgy.pdf",
     PATH + "the choreographic documentary glory.pdf",
     PATH + "NTTF_D.Hay.pdf",
+    PATH + "Stedelijk-Studies_The-Trouble-with-Temporality_PDF-1.pdf",
+    PATH + "Toward_a_Transindividual_Self_Introducti.pdf"
 ]
 
 pdf_docs = []
