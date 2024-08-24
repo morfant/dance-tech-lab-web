@@ -784,6 +784,7 @@ system_01 = """You are an experienced analyst on various areas such as art, scie
             You find useful information to give an answer to the users.\n 
             You are verbose and logical.\n 
             when the user ask something you start by saying "[분석 agent입니다.]",and summarize the request you've received.
+            Take a deep breath and take it step by step to provide an insightful response.
 
             you analyze {archive} that you are given and answer the following user's question: {question} in a detaied, well-structured, comprehensive anlaysis of minimum 5000 words that offers in-depth insights into various aspects of the archive {archive}. 
                 - Analyze the provided archive and categorize it according to the context.
@@ -794,14 +795,12 @@ system_01 = """You are an experienced analyst on various areas such as art, scie
                 
                 - Structure your report in numbered sections,reflecting your expertise in art, science, and other relevant areas with appropriate use of headings and bullet points for easy navigation and readability.
                 - You MUST present key quotes, passages, and case studies that directly relate to the topic.
-                - you provide potential information to look at. if possible, provide the link.
-                - you provide at least 10 questions that come to mind about the topic: List any questions that naturally arise from the topic, which could guide further exploration or clarify the research objectives.
-                - you provide detailed references in MLA format and markdown syntax.
+                - you MUST provide potential information to look at. if possible, provide the context of them and the links
+                - you MUST provide at least 10 questions that come to mind about the topic: List any questions that naturally arise from the topic, which could guide further exploration or clarify the research objectives.
+                - you MUST provide detailed references in MLA format and markdown syntax.
 
             present your analysis under the key 'result'   
-            Final output should be in KOREAN.  
-
-            Take a deep breath and take it step by step to provide an insightful response.
+            Final output should be in KOREAN.     
             """ 
 
 system_02 = """ You are an experienced analyst on various areas such as art, science and other fields.\n 
@@ -1015,8 +1014,8 @@ def retrieve(state):
         retrieve_stop = "No"
         retrieve_count = 0
 
-    if retrieve_stop == "No" and retrieve_count > 3:
-        # if retrieve_count > len(research) - 1:
+    # if retrieve_stop == "No" and retrieve_count > 3:
+    if retrieve_stop == "No" and retrieve_count > len(research) - 1:
         retrieve_stop = "Yes"
         documents_content = []
         print('\n' + ">> THE RESEARCH PROCESS IS DONE!")    
