@@ -63,7 +63,7 @@ export default {
       isReportEnd: false,
       isConnected: false, // 웹소켓 연결 상태
       websocket: null,
-      menus: ["Research", "Rehearsal", "Production", "Feedback"], // 메뉴 항목 추가
+      menus: ["Research", "Rehearsal", "Feedback", "Product"], // 메뉴 항목 추가
       activeMenu: "Research", // 기본 메뉴 설정
     };
   },
