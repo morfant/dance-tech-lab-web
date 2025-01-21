@@ -19,7 +19,8 @@ os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
 # _set_env("LANGCHAIN_API_KEY")
 
 from langchain_community.document_loaders import WebBaseLoader
-from langchain.document_loaders import PyPDFLoader
+# from langchain.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_openai import OpenAIEmbeddings
@@ -30,7 +31,8 @@ from typing import Annotated, Sequence, TypedDict
 from langchain_core.messages import BaseMessage
 from langgraph.graph.message import add_messages
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.pydantic_v1 import BaseModel, Field
+# from langchain_core.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 
 
 from typing import List
@@ -56,7 +58,7 @@ from langchain import hub
 from typing import Annotated, Literal, Sequence, TypedDict
 from langchain_core.messages import BaseMessage, HumanMessage
 from langchain_core.prompts import PromptTemplate
-from langchain_core.pydantic_v1 import BaseModel, Field
+# from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.prompts import ChatPromptTemplate
 
 from langgraph.prebuilt import tools_condition
