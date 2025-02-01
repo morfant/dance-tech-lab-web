@@ -99,6 +99,10 @@ export default {
             this.isFetching = false;
             this.isReportEnd = true;
           }
+        } else if (data.response === "[FEEDBACK]") {
+          console.log("Readty to get feedback!");
+          this.isFetching = false;
+
         } else {
           const { agentType, response } = data;
           // console.log("agentType: ", agentType)
