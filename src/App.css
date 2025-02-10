@@ -87,7 +87,7 @@ h1 {
   border-radius: 4px;
   width: 100%; /* 메시지가 채팅 박스의 전체 너비를 사용하도록 설정 */
   box-sizing: border-box; /* 패딩과 테두리까지 포함하여 width를 설정 */
-  font-size:22px;
+  font-size:20px;
 }
 
 .message.Bot {
@@ -132,6 +132,11 @@ h1 {
 .message.reporter {
   background-color: #d4b8a5; /* 리포터 메시지 색상 - 부드러운 주황색 */
   color: #000; /* 글자 색상 - 검은색 */
+}
+
+.message.prompter {
+  background-color: #40369e; /* 리포터 메시지 색상 - 부드러운 주황색 */
+  color: #ffffff; /* 글자 색상 - 검은색 */
 }
 
 .input-container {

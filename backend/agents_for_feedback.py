@@ -335,8 +335,8 @@ system ="""you are a professional critic with a lot of experiences who critique 
                     - 'plan': A revised, step-by-step plan incorporating the suggested improvements.
                     - 'research_areas': A numbered list of areas requiring further research, with explanations for each.
                 - Final output should be in KOREAN.    
-
             """
+
             # 6. Feedback and Iteration**:
             #     - If the user provides feedback on the critique or plan, incorporate it into an updated version.
             #     - Always confirm with the user if the revisions meet their expectations or if further adjustments are needed.
@@ -884,7 +884,7 @@ def agent(state):
     print('\n' + ">> 실행 계획: {}".format(plan))
     print('\n'+ ">> 리서치 영역: {}".format(research))
 
-    return {"plan": response, "research": research, "question": question, "proceed": False}
+    return {"plan": response, "research": research, "question": question, "archive": "","proceed": False}
    
 
 # check_feedback 노드: 유저가 OK를 입력했는지 확인 (피드백 입력 제거)
@@ -951,7 +951,7 @@ def research(state):
     question = state["question"]
     research = state["research"]
     archive = state["archive"]
-    research_direction = state["research_direction"]
+    # research_direction = state["research_direction"]
 
     retry_count = 0
     success = False
@@ -1512,7 +1512,7 @@ print(config)
 
 graph = workflow.compile(
     checkpointer=memory,
-    interrupt_before=["check_feedback","research_director"])
+    interrupt_before=["check_feedback", "research_director"])
 
 # 컴파일된 그래프 반환
 def get_graph():

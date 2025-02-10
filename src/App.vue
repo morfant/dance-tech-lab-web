@@ -94,16 +94,29 @@ export default {
       this.websocket.onmessage = (event) => {
         const data = JSON.parse(event.data);
 
-        if (data.response === "[END]"){
-          if (data.agentType === "reporter") {
+        if (data.response === "[END]")
+        {
+          if (data.agentType === "reporter") 
+          {
             this.isFetching = false;
             this.isReportEnd = true;
           }
-        } else if (data.response === "[FEEDBACK]") {
+
+          else 
+          {
+             this.isFetching = false;
+          }
+        } 
+        
+        else if (data.response === "[FEEDBACK]") 
+        {
           console.log("Readty to get feedback!");
           this.isFetching = false;
 
-        } else {
+        } 
+        
+        else 
+        {
           const { agentType, response } = data;
           // console.log("agentType: ", agentType)
           if (

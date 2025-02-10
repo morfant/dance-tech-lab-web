@@ -69,7 +69,7 @@ def get_value_from_json(json_string, key):
     try:
         # JSON 문자열을 Python 딕셔너리로 변환
         json_dict = json.loads(json_string)
-        print(">> json_dict:{}".format(json_dict))
+        # print(">> json_dict:{}".format(json_dict))
         
         # 키의 값을 반환
         return json_dict.get(key, None)
@@ -204,56 +204,66 @@ async def websocket_chat(websocket: WebSocket):
 
                     if key != '__interrupt__':
 
-                        initialPlan_ = find_instance_of(value, initialPlan)
-                        review_ = find_instance_of(value, Review)
-                        research_ = find_instance_of(value, Research)
-                        generation_ = find_instance_of(value, AIMessage)
-                        # generation_ = find_instance_of(value, Result) 
-
-                        # print("****************")
-                        # print(type(initialPlan_))
-                        # print(initialPlan_)
-
-                        if initialPlan_ != None:
-                            response_message = format_initial_plan_response(initialPlan_)
-
-                        elif review_ != None:
-                            response_message = format_review_response(review_)
-
-                        elif research_ != None:
-                            response_message = format_research_response(research_)
-
-                        elif generation_ != None:
-                            response_message = generation_.content
-                            # response_message = generation_.report
+                        if key == 'critic':
+                            print("-------critic!--------")
                             
+                            # print(f"{key_}:, {value_}")
+                            result = "\n".join([f"{key_}, : {value_}" for key_, value_ in value.items()])
+                            
+                            response_message = result
+
                         else:
-                            print("--------------Other types--------------")
-                            response_message = object_to_json_string(value)
-                            print("response message")
-                            print(response_message)
-                            research_direction_ = get_value_from_json(response_message, "research_direction")
-                            print("research direction")
-                            print(research_direction_)
-                            research_archive_ = get_value_from_json(response_message, "archive")
-                            print("research archive")
-                            print(research_archive_)
+                            initialPlan_ = find_instance_of(value, initialPlan)
+                            review_ = find_instance_of(value, Review)
+                            research_ = find_instance_of(value, Research)
+                            generation_ = find_instance_of(value, AIMessage)
+                            # generation_ = find_instance_of(value, Result) 
 
-                            if research_direction_ != None and key == 'research_director':
-                                response_message = research_direction_
-                            elif research_archive_ != None and key == 'researcher':
-                                response_message = research_archive_[-1]
-                                key = key + "_" + str(researcher_index)
-                                researcher_index = researcher_index + 1
-                                researcher_index = researcher_index % 3 # researcher 의 css 스타일에 3가지 변주가 가능
+                            # print("****************")
+                            # print(type(initialPlan_))
+                            # print(initialPlan_)
+
+                            if initialPlan_ != None:
+                                response_message = format_initial_plan_response(initialPlan_)
+
+                            elif review_ != None:
+                                response_message = format_review_response(review_)
+
+                            elif research_ != None:
+                                response_message = format_research_response(research_)
+
+                            elif generation_ != None:
+                                response_message = generation_.content
+                                # response_message = generation_.report
+    
                             else:
-                                response_message = None
-        
-                        print(">> response_message: ", response_message)
-                        print(">> key: ", key)
+                                print("--------------Other types--------------")
+                                response_message = object_to_json_string(value)
+                                print("response message")
+                                print(response_message)
+                                research_direction_ = get_value_from_json(response_message, "research_direction")
+                                print("research direction")
+                                print(research_direction_)
+                                research_archive_ = get_value_from_json(response_message, "archive")
+                                print("research archive")
+                                print(research_archive_)
 
+                                if research_direction_ != None and key == 'research_director':
+                                    response_message = research_direction_
+                                elif research_archive_ != None and key == 'researcher':
+                                    response_message = research_archive_[-1]
+                                    key = key + "_" + str(researcher_index)
+                                    researcher_index = researcher_index + 1
+                                    researcher_index = researcher_index % 3 # researcher 의 css 스타일에 3가지 변주가 가능
+                                else:
+                                    response_message = None
+
+                        print(">> Node: ", key)
+                        print(">> response_message: ", response_message)
+                       
                         # 타이핑 효과를 위해, 실시간으로 클라이언트에게 부분적으로 응답을 전송
                         chunk_size = 30  # 한 번에 보낼 글자의 수를 설정, 클수록 출력 빠름
+
                         if response_message != None:
                             for i in range(len(partial_message), len(response_message), chunk_size):
                                 partial_message += response_message[i:i+chunk_size]
@@ -261,11 +271,11 @@ async def websocket_chat(websocket: WebSocket):
                                 await asyncio.sleep(0.001)  # 타이핑 딜레이
                         partial_message = ""
 
-                        await websocket.send_json({"response": "[END]", "agentType": key})
+                        # await websocket.send_json({"response": "[END]", "agentType": key})
 
                     else:
-                        print(">> interupt!")    
-                        await websocket.send_json({"response": "[FEEDBACK]", "agentType": key})
+                        print(">> interupted!")    
+                        await websocket.send_json({"response": "[FEEDBACK]", "agentType": key}) ## activate the input
 
             pprint.pprint("END OF CYCLE ---------------------------------------------------------------------")
             
@@ -278,7 +288,8 @@ async def websocket_chat(websocket: WebSocket):
                     print(">> REQUEST TIME AGAIN")
                     print("요청을 입력해주세요.")#웹상에서 대화 형식으로 표시되어야 함! (구현 필요)
                     input_description = "요청을 입력해주세요."
-                    await websocket.send_json({"response":  input_description, "agentType": 'research_director'}) #KEY 값
+                    await websocket.send_json({"response":  input_description, "agentType": 'prompter'}) #KEY 값
+                    await websocket.send_json({"response": "[END]", "agentType": key})
                     # feedback = False
                     
             ### interruptions before nodes
@@ -287,8 +298,8 @@ async def websocket_chat(websocket: WebSocket):
                     print(">> FEEDBACK TIME")
                     feedback = True
                     print("피드백 하실 내용을 입력해주세요.") #웹상에서 대화 형식으로 표시되어야 함! (구현 필요)
-                    input_description = "피드백 하실 내용을 입력해주세요. 괜찮으시면 OK : "   
-                    await websocket.send_json({"response":  input_description, "agentType":'research_director'})  #KEY 값
+                    input_description = "피드백 하실 내용을 입력해주세요. 괜찮으시면 OK 라고 입력해주세요. : "   
+                    await websocket.send_json({"response":  input_description, "agentType":'prompter'})  #KEY 값
 
     except WebSocketDisconnect:
         print("WebSocket connection closed")
